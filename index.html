@@ -3,19 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WWWAQUA 计划看板（按月+汇总｜费比优先）</title>
+  <title>WWWAQUA 计划看板（费比优先｜按月+汇总）</title>
   <style>
     :root{
       --bg:#0b1220;
-      --panel:#0f1a2e;
       --text:#eaf0ff;
       --muted:#9fb0d0;
       --line:rgba(255,255,255,.08);
       --good:#22c55e;
       --warn:#f59e0b;
       --bad:#ef4444;
-      --accent:#4f8cff;
-      --accent2:#7c3aed;
       --shadow:0 18px 45px rgba(0,0,0,.35);
       --radius:18px;
     }
@@ -37,7 +34,7 @@
     }
     .title{display:flex;flex-direction:column;gap:6px}
     .title h1{margin:0;font-size:18px;letter-spacing:.3px;font-weight:800}
-    .title p{margin:0;color:var(--muted);font-size:12px;line-height:1.4}
+    .title p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
     .pill{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .chip{
       border:1px solid var(--line);
@@ -72,7 +69,7 @@
       padding:10px 12px;border-radius:14px;
     }
     .monthbar label{font-size:12px;color:var(--muted)}
-    select, input[type="number"]{
+    select,input[type="number"]{
       border:1px solid var(--line);
       background:rgba(0,0,0,.16);
       color:var(--text);
@@ -101,7 +98,9 @@
       grid-template-columns: 1.05fr .95fr;
       gap:14px;
     }
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
 
     .card{
       background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
@@ -121,7 +120,6 @@
     .name span{font-size:12px;color:var(--muted)}
     .bd{padding:14px}
 
-    /* KPI */
     .kpis{
       display:grid;
       grid-template-columns: repeat(4, 1fr);
@@ -147,14 +145,14 @@
     .kpi .val{font-size:18px;font-weight:900;letter-spacing:.2px;position:relative}
     .kpi .sub{margin-top:6px;color:var(--muted);font-size:12px;position:relative}
 
-    /* Fee ratio highlight FIRST and BIG */
+    /* Fee ratio FIRST and BIG */
     .fee{
       grid-column: 1 / -1;
       background:linear-gradient(135deg, rgba(79,140,255,.26), rgba(124,58,237,.20));
       border-color: rgba(79,140,255,.40);
       padding:16px;
     }
-    .fee .val{font-size:44px;letter-spacing:.6px}
+    .fee .val{font-size:46px;letter-spacing:.6px}
     .meter{
       margin-top:10px;height:10px;border-radius:999px;
       background:rgba(255,255,255,.10);overflow:hidden;
@@ -178,7 +176,6 @@
     .badge.warn .dot{background:var(--warn)}
     .badge.bad .dot{background:var(--bad)}
 
-    /* Inputs */
     .form{
       display:grid;
       grid-template-columns: repeat(2, 1fr);
@@ -205,11 +202,13 @@
     .field input::placeholder{color:rgba(159,176,208,.5)}
     .hint{
       margin-top:10px;color:var(--muted);
-      font-size:12px;line-height:1.45;
+      font-size:12px;line-height:1.55;
     }
 
     table{
-      width:100%;border-collapse:separate;border-spacing:0;
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
       border:1px solid var(--line);
       border-radius:16px;
       background:rgba(0,0,0,.14);
@@ -227,7 +226,6 @@
     td b{color:var(--text)}
     .right{text-align:right}
     .mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;}
-    .note{margin-top:10px;font-size:12px;color:rgba(159,176,208,.9);line-height:1.5}
     .warnbox{
       margin-top:12px;padding:12px;border-radius:16px;
       border:1px solid rgba(245,158,11,.25);
@@ -237,231 +235,259 @@
       display:none;
     }
     .warnbox.show{display:block}
-    .footer{margin:14px 0 22px;color:rgba(159,176,208,.85);font-size:12px;line-height:1.5}
-    .footer code{color:#cfe3ff}
+    .footer{
+      margin:14px 0 0;
+      color:rgba(159,176,208,.85);
+      font-size:12px;line-height:1.5
+    }
+    code{color:#cfe3ff}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="title">
-        <h1>WWWAQUA 计划看板（费比优先）</h1>
-        <p class="mono">费比口径： (投流+平台费+运费) ÷ 净支付｜红线默认 <b>28%</b>｜税默认：VAT 13% / 平台投流票 6% / 所得税 ≤300万5% 超额25%</p>
-      </div>
-      <div class="pill">
-        <div class="chip">视图：<b id="viewName">当月</b></div>
-        <div class="chip">当前月份：<b id="monthName">01月</b></div>
-      </div>
-    </header>
-
-    <div class="toolbar">
-      <div class="seg">
-        <button id="btnMonth" class="active" onclick="setView('month')">当月</button>
-        <button id="btnYear" onclick="setView('year')">全年汇总</button>
-      </div>
-
-      <div class="monthbar">
-        <label>月份</label>
-        <select id="monthSel" onchange="onMonthChange()"></select>
-
-        <div class="btns">
-          <button class="btn secondary" onclick="copyPrevMonth()">复制上月</button>
-          <button class="btn secondary" onclick="fillFishTankExample()">鱼缸示例</button>
-          <button class="btn danger" onclick="clearMonth()">清空本月</button>
-        </div>
-      </div>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <h1>WWWAQUA 计划看板（费比优先｜按月+汇总）</h1>
+      <p class="mono">
+        仅保留一项收入：<b>净支付金额</b>（=含税销售收入）。<br/>
+        成本仅输入<b>单个成本</b>（默认200），用 <code>销量=净支付÷单价</code> 反推当月成本总额。<br/>
+        默认：费比红线 <b>28%</b>｜平台费率 <b>10%</b>｜快递费率 <b>5%</b>｜VAT 13%｜平台/投流票 6%｜所得税 ≤300万 5% / 超额 25%。<br/>
+        <b>点“计算”才刷新</b>（避免输入时跳动）。
+      </p>
     </div>
+    <div class="pill">
+      <div class="chip">视图：<b id="viewName">当月</b></div>
+      <div class="chip">当前月份：<b id="monthName">01月</b></div>
+    </div>
+  </header>
 
-    <div class="grid">
-      <!-- Left KPIs -->
-      <div class="card">
-        <div class="hd">
-          <div class="name">
-            <strong>总览（点击“计算”才刷新）</strong>
-            <span>数据保存本地（localStorage）</span>
-          </div>
-          <span id="feeBadge" class="badge"><span class="dot"></span><span id="feeStatusText">—</span></span>
-        </div>
-        <div class="bd">
-          <div class="kpis">
-            <!-- Fee ratio FIRST and BIG -->
-            <div class="kpi fee">
-              <div class="lbl">电商渠道费比（≤ <span id="capShow" class="mono">28%</span>）</div>
-              <div class="val mono" id="feeRatio">—</div>
-              <div class="sub mono">渠道费用：<span id="channelCost">—</span> ｜净支付：<span id="netPayShow">—</span></div>
-              <div class="meter"><div class="bar" id="feeBar"></div></div>
-              <div class="sub mono" style="margin-top:8px">剩余空间：<span id="feeRoom">—</span></div>
-            </div>
-
-            <div class="kpi">
-              <div class="lbl">应交增值税</div>
-              <div class="val mono" id="vatPay">—</div>
-              <div class="sub">销项 − 进项</div>
-            </div>
-
-            <div class="kpi">
-              <div class="lbl">税前利润</div>
-              <div class="val mono" id="profitBT">—</div>
-              <div class="sub">含税收入 − 含税支出 − VAT</div>
-            </div>
-
-            <div class="kpi">
-              <div class="lbl">税后净利润</div>
-              <div class="val mono" id="profitAT">—</div>
-              <div class="sub mono">所得税：<span id="citShow">—</span></div>
-            </div>
-          </div>
-
-          <div class="warnbox" id="warnBox"></div>
-
-          <div class="note">
-            默认：成本/运费按<b>13%</b>票抵扣；平台/投流按<b>6%</b>票抵扣。费比红线默认<b>28%</b>，平台默认<b>10%</b>，快递默认<b>5%</b>。
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Inputs + Detail -->
-      <div class="card">
-        <div class="hd">
-          <div class="name">
-            <strong>输入区</strong>
-            <span>平台费/快递费可填“净支付×比例”自动算</span>
-          </div>
-          <button class="btn" style="padding:10px 12px" onclick="calculate()">计算</button>
-        </div>
-        <div class="bd">
-          <div class="form">
-            <div class="field">
-              <label>净支付金额（费比分母）<small>含税</small></label>
-              <input id="netPay" type="number" step="0.01" placeholder="例如 314186.68">
-            </div>
-
-            <div class="field">
-              <label>投流金额（含税）<small>6%票</small></label>
-              <input id="adSpend" type="number" step="0.01" placeholder="例如 36268">
-            </div>
-
-            <div class="field">
-              <label>平台费率（%）<small>默认 10</small></label>
-              <input id="platformRate" type="number" step="0.01" placeholder="10">
-            </div>
-
-            <div class="field">
-              <label>快递费率（%）<small>默认 5</small></label>
-              <input id="shipRate" type="number" step="0.01" placeholder="5">
-            </div>
-
-            <div class="field">
-              <label>平台费（含税）<small>自动=净支付×费率</small></label>
-              <input id="platformFee" type="number" step="0.01" placeholder="自动计算">
-            </div>
-
-            <div class="field">
-              <label>运费（含税）<small>自动=净支付×费率</small></label>
-              <input id="shipFee" type="number" step="0.01" placeholder="自动计算">
-            </div>
-
-            <div class="field">
-              <label>含税销售收入（税务利润）<small>当月/全年</small></label>
-              <input id="sales" type="number" step="0.01" placeholder="例如 600000">
-            </div>
-
-            <div class="field">
-              <label>含税产品成本（13%票）<small>当月/全年</small></label>
-              <input id="cogs" type="number" step="0.01" placeholder="例如 200000">
-            </div>
-          </div>
-
-          <div class="hint">
-            默认税率固定：VAT 13%、平台/投流票 6%、所得税 ≤300万 5% / 超额 25%。<br/>
-            费比红线固定默认 28%（如需改动可在代码里调整）。
-          </div>
-
-          <div style="margin-top:12px">
-            <table class="mono">
-              <thead>
-                <tr>
-                  <th>明细</th>
-                  <th class="right">金额</th>
-                  <th class="right">说明</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><b>费比</b></td>
-                  <td class="right"><b id="t_fee">—</b></td>
-                  <td class="right">≤ <span id="t_cap">—</span></td>
-                </tr>
-                <tr>
-                  <td>渠道费用合计</td>
-                  <td class="right" id="t_channel">—</td>
-                  <td class="right">投流+平台+运费</td>
-                </tr>
-                <tr>
-                  <td>销项税</td>
-                  <td class="right" id="t_vat_out">—</td>
-                  <td class="right">销售含税×13/113</td>
-                </tr>
-                <tr>
-                  <td>进项税（成本）</td>
-                  <td class="right" id="t_vat_c">—</td>
-                  <td class="right">成本×13/113</td>
-                </tr>
-                <tr>
-                  <td>进项税（运费）</td>
-                  <td class="right" id="t_vat_f">—</td>
-                  <td class="right">运费×13/113</td>
-                </tr>
-                <tr>
-                  <td>进项税（平台）</td>
-                  <td class="right" id="t_vat_p">—</td>
-                  <td class="right">平台×6/106</td>
-                </tr>
-                <tr>
-                  <td>进项税（投流）</td>
-                  <td class="right" id="t_vat_x">—</td>
-                  <td class="right">投流×6/106</td>
-                </tr>
-                <tr>
-                  <td><b>应交增值税</b></td>
-                  <td class="right"><b id="t_vat_pay">—</b></td>
-                  <td class="right">销项−进项</td>
-                </tr>
-                <tr>
-                  <td><b>税前利润</b></td>
-                  <td class="right"><b id="t_profit_bt">—</b></td>
-                  <td class="right">收入−支出−VAT</td>
-                </tr>
-                <tr>
-                  <td>企业所得税</td>
-                  <td class="right" id="t_cit">—</td>
-                  <td class="right">≤300万5%/超额25%</td>
-                </tr>
-                <tr>
-                  <td><b>税后净利润</b></td>
-                  <td class="right"><b id="t_profit_at">—</b></td>
-                  <td class="right">税前−所得税</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="footer">
-              离线使用：保存为 <code>index.html</code>，浏览器打开即可。数据保存在本地缓存（清除缓存会丢）。
-            </div>
-          </div>
-
-        </div>
+  <div class="toolbar">
+    <div class="seg">
+      <button id="btnMonth" class="active" onclick="setView('month')">当月</button>
+      <button id="btnYear" onclick="setView('year')">全年汇总</button>
+    </div>
+    <div class="monthbar">
+      <label>月份</label>
+      <select id="monthSel" onchange="onMonthChange()"></select>
+      <div class="btns">
+        <button class="btn secondary" onclick="copyPrevMonth()">复制上月</button>
+        <button class="btn danger" onclick="clearMonth()">清空本月</button>
       </div>
     </div>
   </div>
 
+  <div class="grid">
+    <!-- LEFT KPIs -->
+    <div class="card">
+      <div class="hd">
+        <div class="name">
+          <strong>总览</strong>
+          <span>费比： (投流+平台+运费) ÷ 净支付</span>
+        </div>
+        <span id="feeBadge" class="badge"><span class="dot"></span><span id="feeStatusText">—</span></span>
+      </div>
+
+      <div class="bd">
+        <div class="kpis">
+          <div class="kpi fee">
+            <div class="lbl">电商渠道费比（≤ 28%）</div>
+            <div class="val mono" id="feeRatio">—</div>
+            <div class="sub mono">渠道费用：<span id="channelCost">—</span> ｜净支付：<span id="netPayShow">—</span></div>
+            <div class="meter"><div class="bar" id="feeBar"></div></div>
+            <div class="sub mono" style="margin-top:8px">
+              剩余空间：<span id="feeRoom">—</span>｜
+              <b>可加投流上限：</b><span id="addAdCap">—</span>
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="lbl">应交增值税</div>
+            <div class="val mono" id="vatPay">—</div>
+            <div class="sub">销项 − 进项</div>
+          </div>
+
+          <div class="kpi">
+            <div class="lbl">税前利润</div>
+            <div class="val mono" id="profitBT">—</div>
+            <div class="sub">收入 − 成本 − 渠道费 − VAT</div>
+          </div>
+
+          <div class="kpi">
+            <div class="lbl">税后净利润</div>
+            <div class="val mono" id="profitAT">—</div>
+            <div class="sub mono">所得税：<span id="citShow">—</span></div>
+          </div>
+        </div>
+
+        <div class="warnbox" id="warnBox"></div>
+
+        <div class="footer">
+          离线使用：保存为 <code>index.html</code>，浏览器打开即可。数据保存在本地缓存（清缓存会丢）。
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT Inputs + Detail -->
+    <div class="card">
+      <div class="hd">
+        <div class="name">
+          <strong>输入区</strong>
+          <span>净支付是唯一收入项；成本按单个成本反推</span>
+        </div>
+        <button class="btn" style="padding:10px 12px" onclick="calculate()">计算</button>
+      </div>
+
+      <div class="bd">
+        <div class="form">
+          <div class="field">
+            <label>净支付金额（=含税销售收入）<small>本月/全年</small></label>
+            <input id="netPay" type="number" step="0.01" placeholder="例如 314186.68">
+          </div>
+
+          <div class="field">
+            <label>投流金额（含税）<small>6%进项</small></label>
+            <input id="adSpend" type="number" step="0.01" placeholder="例如 36268">
+          </div>
+
+          <div class="field">
+            <label>平台费率（%）<small>默认 10</small></label>
+            <input id="platformRate" type="number" step="0.01" placeholder="10">
+          </div>
+
+          <div class="field">
+            <label>快递费率（%）<small>默认 5</small></label>
+            <input id="shipRate" type="number" step="0.01" placeholder="5">
+          </div>
+
+          <div class="field">
+            <label>平台费（含税）<small>=净支付×费率</small></label>
+            <input id="platformFee" type="number" step="0.01" disabled placeholder="点击计算自动填充">
+          </div>
+
+          <div class="field">
+            <label>运费（含税）<small>=净支付×费率</small></label>
+            <input id="shipFee" type="number" step="0.01" disabled placeholder="点击计算自动填充">
+          </div>
+
+          <div class="field">
+            <label>单价（固定）<small>默认 600</small></label>
+            <input id="unitPrice" type="number" step="0.01" placeholder="600">
+          </div>
+
+          <div class="field">
+            <label>单个成本（可填）<small>默认 200（13%进项）</small></label>
+            <input id="unitCost" type="number" step="0.01" placeholder="200">
+          </div>
+        </div>
+
+        <div class="hint">
+          反推：<b>销量 = 净支付 ÷ 单价</b>；<b>成本总额 = 销量 × 单个成本</b>。<br/>
+          VAT：销项=销售×13/113；进项=成本×13/113 + 运费×13/113 + 平台×6/106 + 投流×6/106。
+        </div>
+
+        <div style="margin-top:12px">
+          <table class="mono">
+            <thead>
+              <tr>
+                <th>明细</th>
+                <th class="right">金额</th>
+                <th class="right">说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>费比</b></td>
+                <td class="right"><b id="t_fee">—</b></td>
+                <td class="right">≤ 28.00%</td>
+              </tr>
+              <tr>
+                <td>渠道费用合计</td>
+                <td class="right" id="t_channel">—</td>
+                <td class="right">投流+平台+运费</td>
+              </tr>
+              <tr>
+                <td>估算销量</td>
+                <td class="right" id="t_qty">—</td>
+                <td class="right">净支付÷单价</td>
+              </tr>
+              <tr>
+                <td>成本总额</td>
+                <td class="right" id="t_cost_total">—</td>
+                <td class="right">销量×单个成本</td>
+              </tr>
+              <tr>
+                <td>销项税</td>
+                <td class="right" id="t_vat_out">—</td>
+                <td class="right">销售×13/113</td>
+              </tr>
+              <tr>
+                <td>进项税（成本）</td>
+                <td class="right" id="t_vat_in_cost">—</td>
+                <td class="right">成本×13/113</td>
+              </tr>
+              <tr>
+                <td>进项税（运费）</td>
+                <td class="right" id="t_vat_in_ship">—</td>
+                <td class="right">运费×13/113</td>
+              </tr>
+              <tr>
+                <td>进项税（平台）</td>
+                <td class="right" id="t_vat_in_platform">—</td>
+                <td class="right">平台×6/106</td>
+              </tr>
+              <tr>
+                <td>进项税（投流）</td>
+                <td class="right" id="t_vat_in_ad">—</td>
+                <td class="right">投流×6/106</td>
+              </tr>
+              <tr>
+                <td><b>应交增值税</b></td>
+                <td class="right"><b id="t_vat_pay">—</b></td>
+                <td class="right">销项−进项</td>
+              </tr>
+              <tr>
+                <td><b>税前利润</b></td>
+                <td class="right"><b id="t_profit_bt">—</b></td>
+                <td class="right">收入−成本−渠道−VAT</td>
+              </tr>
+              <tr>
+                <td>企业所得税</td>
+                <td class="right" id="t_cit">—</td>
+                <td class="right">≤300万5%/超额25%</td>
+              </tr>
+              <tr>
+                <td><b>税后净利润</b></td>
+                <td class="right"><b id="t_profit_at">—</b></td>
+                <td class="right">税前−所得税</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
   const $ = (id)=>document.getElementById(id);
-  const STORE_KEY = "WWWAQUA_DASHBOARD_V3";
+  const STORE_KEY = "WWWAQUA_DASHBOARD_V6";
   const MONTHS = Array.from({length:12}, (_,i)=>String(i+1).padStart(2,"0"));
 
-  function num(v){ const x = parseFloat(v); return isNaN(x)?0:x; }
-  function pct(v){ return num(v)/100; }
+  // ===== Defaults (fixed rules) =====
+  const FEE_CAP = 0.28;          // 28%
+  const DEF_PLATFORM_RATE = 10;  // %
+  const DEF_SHIP_RATE = 5;       // %
+  const DEF_UNIT_PRICE = 600;
+  const DEF_UNIT_COST  = 200;
+
+  const VAT13 = 0.13;
+  const VAT6  = 0.06;
+  const CIT_THRESHOLD = 3000000; // 300万
+  const CIT_LOW = 0.05;
+  const CIT_HIGH = 0.25;
+
+  function num(v){ const x = parseFloat(v); return isNaN(x) ? 0 : x; }
   function fmtMoney(n){
     if(!isFinite(n)) return "—";
     return n.toLocaleString("zh-CN",{minimumFractionDigits:2, maximumFractionDigits:2});
@@ -471,26 +497,13 @@
     return (n*100).toFixed(2) + "%";
   }
 
-  // ===== Defaults per your latest rules =====
-  const DEFAULTS = {
-    feeCap: 0.28,        // 28%
-    platformRate: 0.10,  // 10%
-    shipRate: 0.05,      // 5%
-    vat13: 0.13,         // 13%
-    vat6: 0.06,          // 6%
-    citThreshold: 3000000, // 300万
-    citLow: 0.05,        // 5%
-    citHigh: 0.25        // 25%
-  };
-
   const emptyMonth = ()=>({
     netPay: 0,
     adSpend: 0,
-    sales: 0,
-    cogs: 0,
-    // we store rates per month to keep simple; still defaulted on load
-    platformRate: 10,
-    shipRate: 5,
+    platformRate: DEF_PLATFORM_RATE,
+    shipRate: DEF_SHIP_RATE,
+    unitPrice: DEF_UNIT_PRICE,
+    unitCost: DEF_UNIT_COST,
   });
 
   let state = {
@@ -534,7 +547,6 @@
     $("btnMonth").classList.toggle("active", v==="month");
     $("btnYear").classList.toggle("active", v==="year");
     $("viewName").textContent = v==="month" ? "当月" : "全年汇总";
-    // 不自动计算，等用户点按钮
   }
   window.setView = setView;
 
@@ -548,35 +560,22 @@
 
   function renderInputs(){
     const d = state.months[state.month];
+    $("netPay").value = (d.netPay || d.netPay===0) ? (d.netPay || "") : "";
+    $("adSpend").value = (d.adSpend || d.adSpend===0) ? (d.adSpend || "") : "";
+    $("platformRate").value = (d.platformRate ?? DEF_PLATFORM_RATE);
+    $("shipRate").value = (d.shipRate ?? DEF_SHIP_RATE);
+    $("unitPrice").value = (d.unitPrice ?? DEF_UNIT_PRICE);
+    $("unitCost").value = (d.unitCost ?? DEF_UNIT_COST);
 
-    $("netPay").value = d.netPay || "";
-    $("adSpend").value = d.adSpend || "";
-    $("sales").value = d.sales || "";
-    $("cogs").value = d.cogs || "";
-
-    $("platformRate").value = (d.platformRate ?? 10);
-    $("shipRate").value = (d.shipRate ?? 5);
-
-    // show cap default
-    $("capShow").textContent = "28%";
-    $("t_cap").textContent = "28.00%";
-
-    // clear computed fields (platformFee/shipFee) until calculate
     $("platformFee").value = "";
     $("shipFee").value = "";
   }
 
   function bindInputs(){
-    const ids = ["netPay","adSpend","sales","cogs","platformRate","shipRate"];
-    ids.forEach(id=>{
+    ["netPay","adSpend","platformRate","shipRate","unitPrice","unitCost"].forEach(id=>{
       $(id).addEventListener("input", ()=>{
-        const m = state.month;
-        const d = state.months[m];
-        if(id==="platformRate" || id==="shipRate"){
-          d[id] = num($(id).value);
-        }else{
-          d[id] = num($(id).value);
-        }
+        const d = state.months[state.month];
+        d[id] = num($(id).value);
         saveState();
       });
     });
@@ -600,103 +599,100 @@
   }
   window.clearMonth = clearMonth;
 
-  function fillFishTankExample(){
-    // Fish tank example: unit 600, qty 1000, cost 200, ship 5%, platform 10%, ads 12%
-    // Here: we just fill totals and keep default rates.
-    const qty = 1000;
-    const sales = 600 * qty;
-    const cogs = 200 * qty;
-    const netPay = sales; // demo
-    const adSpend = sales * 0.12;
-
-    state.months[state.month] = {
-      ...emptyMonth(),
-      netPay, adSpend, sales, cogs,
-      platformRate: 10,
-      shipRate: 5
-    };
-    saveState();
-    renderInputs();
-  }
-  window.fillFishTankExample = fillFishTankExample;
-
   function sumYear(){
-    const sum = {netPay:0, adSpend:0, sales:0, cogs:0, platformRate:10, shipRate:5};
+    // 汇总只加总净支付与投流；费率/单价/单成本用当月默认（可在右侧输入后用于计算）
+    const out = emptyMonth();
+    out.netPay = 0;
+    out.adSpend = 0;
     for(const m of MONTHS){
       const d = state.months[m];
-      sum.netPay += num(d.netPay);
-      sum.adSpend += num(d.adSpend);
-      sum.sales  += num(d.sales);
-      sum.cogs   += num(d.cogs);
+      out.netPay += num(d.netPay);
+      out.adSpend += num(d.adSpend);
     }
-    return sum;
-  }
-
-  function calcOne(d){
-    // Rates (percent inputs)
-    const pr = (isFinite(d.platformRate) ? d.platformRate : 10) / 100;
-    const sr = (isFinite(d.shipRate) ? d.shipRate : 5) / 100;
-
-    // Auto platform & shipping from netPay (per your rule)
-    const platformFee = d.netPay * pr;
-    const shipFee = d.netPay * sr;
-
-    // Fee ratio
-    const channelCost = d.adSpend + platformFee + shipFee;
-    const feeRatio = d.netPay > 0 ? channelCost / d.netPay : NaN;
-    const room = d.netPay > 0 ? (DEFAULTS.feeCap - feeRatio) * d.netPay : NaN;
-
-    // VAT (defaults fixed)
-    const vatOut = d.sales * (DEFAULTS.vat13 / (1 + DEFAULTS.vat13));
-    const vatC = d.cogs * (DEFAULTS.vat13 / (1 + DEFAULTS.vat13));
-    const vatF = shipFee * (DEFAULTS.vat13 / (1 + DEFAULTS.vat13));
-    const vatP = platformFee * (DEFAULTS.vat6 / (1 + DEFAULTS.vat6));
-    const vatX = d.adSpend * (DEFAULTS.vat6 / (1 + DEFAULTS.vat6));
-    const vatPay = vatOut - (vatC + vatF + vatP + vatX);
-
-    const totalSpend = d.cogs + shipFee + platformFee + d.adSpend;
-    const profitBT = d.sales - totalSpend - vatPay;
-
-    // CIT default fixed
-    let cit = 0;
-    if(profitBT <= 0) cit = 0;
-    else if(profitBT <= DEFAULTS.citThreshold) cit = profitBT * DEFAULTS.citLow;
-    else cit = DEFAULTS.citThreshold * DEFAULTS.citLow + (profitBT - DEFAULTS.citThreshold) * DEFAULTS.citHigh;
-
-    const profitAT = profitBT - cit;
-
-    return {
-      platformFee, shipFee, channelCost, feeRatio, room,
-      vatOut, vatC, vatF, vatP, vatX, vatPay,
-      profitBT, cit, profitAT
-    };
+    // 年汇总：取当前输入框里的费率/单价/单成本（方便你做年度统一假设）
+    out.platformRate = num($("platformRate").value) || DEF_PLATFORM_RATE;
+    out.shipRate = num($("shipRate").value) || DEF_SHIP_RATE;
+    out.unitPrice = num($("unitPrice").value) || DEF_UNIT_PRICE;
+    out.unitCost = num($("unitCost").value) || DEF_UNIT_COST;
+    return out;
   }
 
   function calculate(){
     const data = (state.view === "year") ? sumYear() : state.months[state.month];
-    const r = calcOne(data);
 
-    // Put computed platform & ship in fields for transparency
-    $("platformFee").value = r.platformFee.toFixed(2);
-    $("shipFee").value = r.shipFee.toFixed(2);
+    const netPay = num(data.netPay);
+    const adSpend = num(data.adSpend);
 
-    // KPI
-    $("feeRatio").textContent = fmtPct(r.feeRatio);
-    $("channelCost").textContent = fmtMoney(r.channelCost);
-    $("netPayShow").textContent = fmtMoney(data.netPay);
-    $("feeRoom").textContent = isFinite(r.room) ? (r.room>=0 ? ("+"+fmtMoney(r.room)) : ("-"+fmtMoney(Math.abs(r.room)))) : "—";
+    const platformRate = (num(data.platformRate) || DEF_PLATFORM_RATE) / 100;
+    const shipRate = (num(data.shipRate) || DEF_SHIP_RATE) / 100;
 
-    $("vatPay").textContent = fmtMoney(r.vatPay);
-    $("profitBT").textContent = fmtMoney(r.profitBT);
-    $("profitAT").textContent = fmtMoney(r.profitAT);
-    $("citShow").textContent = fmtMoney(r.cit);
+    const unitPrice = num(data.unitPrice) || DEF_UNIT_PRICE;
+    const unitCost  = num(data.unitCost)  || DEF_UNIT_COST;
+
+    // 平台/运费按净支付比例自动算
+    const platformFee = netPay * platformRate;
+    const shipFee = netPay * shipRate;
+
+    $("platformFee").value = isFinite(platformFee) ? platformFee.toFixed(2) : "";
+    $("shipFee").value = isFinite(shipFee) ? shipFee.toFixed(2) : "";
+
+    // 费比
+    const channelCost = adSpend + platformFee + shipFee;
+    const feeRatio = netPay > 0 ? channelCost / netPay : NaN;
+    const feeRoom = netPay > 0 ? (FEE_CAP - feeRatio) * netPay : NaN;
+
+    // 可加投流上限（不突破28%）
+    const maxChannelCost = netPay * FEE_CAP;
+    const addAdCap = maxChannelCost - channelCost;
+
+    // 销售额=净支付（唯一收入项）
+    const sales = netPay;
+
+    // 反推销量与成本
+    const qty = (unitPrice > 0) ? (sales / unitPrice) : 0;
+    const costTotal = qty * unitCost;
+
+    // VAT（进项包含：成本13%、运费13%、平台6%、投流6%）
+    const vatOut = sales * (VAT13 / (1 + VAT13));
+    const vatInCost = costTotal * (VAT13 / (1 + VAT13));
+    const vatInShip = shipFee * (VAT13 / (1 + VAT13));
+    const vatInPlatform = platformFee * (VAT6 / (1 + VAT6));
+    const vatInAd = adSpend * (VAT6 / (1 + VAT6));
+    const vatPay = vatOut - (vatInCost + vatInShip + vatInPlatform + vatInAd);
+
+    // 利润
+    const profitBT = sales - costTotal - channelCost - vatPay;
+
+    let cit = 0;
+    if(profitBT <= 0) cit = 0;
+    else if(profitBT <= CIT_THRESHOLD) cit = profitBT * CIT_LOW;
+    else cit = CIT_THRESHOLD * CIT_LOW + (profitBT - CIT_THRESHOLD) * CIT_HIGH;
+
+    const profitAT = profitBT - cit;
+
+    // ===== KPI render =====
+    $("feeRatio").textContent = fmtPct(feeRatio);
+    $("channelCost").textContent = fmtMoney(channelCost);
+    $("netPayShow").textContent = fmtMoney(netPay);
+    $("feeRoom").textContent = isFinite(feeRoom)
+      ? (feeRoom >= 0 ? ("+"+fmtMoney(feeRoom)) : ("-"+fmtMoney(Math.abs(feeRoom))))
+      : "—";
+
+    $("addAdCap").textContent = isFinite(addAdCap)
+      ? (addAdCap >= 0 ? ("+" + fmtMoney(addAdCap)) : ("需减少 " + fmtMoney(Math.abs(addAdCap))))
+      : "—";
+
+    $("vatPay").textContent = fmtMoney(vatPay);
+    $("profitBT").textContent = fmtMoney(profitBT);
+    $("profitAT").textContent = fmtMoney(profitAT);
+    $("citShow").textContent = fmtMoney(cit);
 
     // meter
-    const denom = DEFAULTS.feeCap * 1.6;
-    const w = isFinite(r.feeRatio) ? Math.max(0, Math.min(1, r.feeRatio/denom)) : 0;
+    const denom = FEE_CAP * 1.6;
+    const w = isFinite(feeRatio) ? Math.max(0, Math.min(1, feeRatio/denom)) : 0;
     $("feeBar").style.width = (w*100).toFixed(1) + "%";
 
-    // Badge + warning
+    // badge & warning
     const badge = $("feeBadge");
     const warnBox = $("warnBox");
     badge.classList.remove("good","warn","bad");
@@ -704,14 +700,14 @@
     warnBox.textContent = "";
 
     let statusText = "—";
-    if(isFinite(r.feeRatio)){
-      if(r.feeRatio <= DEFAULTS.feeCap){
-        const near = r.feeRatio >= DEFAULTS.feeCap - 0.01;
+    if(isFinite(feeRatio)){
+      if(feeRatio <= FEE_CAP){
+        const near = feeRatio >= FEE_CAP - 0.01;
         if(near){
           badge.classList.add("warn");
           statusText = "接近红线";
           warnBox.classList.add("show");
-          warnBox.textContent = `费比接近红线：当前 ${fmtPct(r.feeRatio)}，红线 28.00%。建议：优先压投流/运费补贴/平台成本，或提升净支付。`;
+          warnBox.textContent = `费比接近红线：当前 ${fmtPct(feeRatio)}，红线 28.00%。建议：先压投流/运费补贴/平台成本，或提升净支付。`;
         }else{
           badge.classList.add("good");
           statusText = "合规（PASS）";
@@ -720,23 +716,27 @@
         badge.classList.add("bad");
         statusText = "超红线（FAIL）";
         warnBox.classList.add("show");
-        warnBox.textContent = `费比超红线：当前 ${fmtPct(r.feeRatio)}，红线 28.00%。必须降投流/降低补贴/提升净支付。`;
+        warnBox.textContent = `费比超红线：当前 ${fmtPct(feeRatio)}，红线 28.00%。需要减少投流或提升净支付。`;
       }
     }
     $("feeStatusText").textContent = statusText;
 
     // table
-    $("t_fee").textContent = fmtPct(r.feeRatio);
-    $("t_channel").textContent = fmtMoney(r.channelCost);
-    $("t_vat_out").textContent = fmtMoney(r.vatOut);
-    $("t_vat_c").textContent = fmtMoney(r.vatC);
-    $("t_vat_f").textContent = fmtMoney(r.vatF);
-    $("t_vat_p").textContent = fmtMoney(r.vatP);
-    $("t_vat_x").textContent = fmtMoney(r.vatX);
-    $("t_vat_pay").textContent = fmtMoney(r.vatPay);
-    $("t_profit_bt").textContent = fmtMoney(r.profitBT);
-    $("t_cit").textContent = fmtMoney(r.cit);
-    $("t_profit_at").textContent = fmtMoney(r.profitAT);
+    $("t_fee").textContent = fmtPct(feeRatio);
+    $("t_channel").textContent = fmtMoney(channelCost);
+    $("t_qty").textContent = isFinite(qty) ? qty.toFixed(2) : "—";
+    $("t_cost_total").textContent = fmtMoney(costTotal);
+
+    $("t_vat_out").textContent = fmtMoney(vatOut);
+    $("t_vat_in_cost").textContent = fmtMoney(vatInCost);
+    $("t_vat_in_ship").textContent = fmtMoney(vatInShip);
+    $("t_vat_in_platform").textContent = fmtMoney(vatInPlatform);
+    $("t_vat_in_ad").textContent = fmtMoney(vatInAd);
+    $("t_vat_pay").textContent = fmtMoney(vatPay);
+
+    $("t_profit_bt").textContent = fmtMoney(profitBT);
+    $("t_cit").textContent = fmtMoney(cit);
+    $("t_profit_at").textContent = fmtMoney(profitAT);
 
     // pills
     $("viewName").textContent = state.view === "month" ? "当月" : "全年汇总";
@@ -744,7 +744,7 @@
   }
   window.calculate = calculate;
 
-  // ===== Init =====
+  // ===== init =====
   loadState();
   buildMonthOptions();
   bindInputs();
