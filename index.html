@@ -1,3 +1,12 @@
+没问题 ✅ 我给你把“平台费/运费”做成 两种模式：
+
+自动模式（默认）：平台费 = 净支付×平台费率；运费 = 净支付×快递费率
+手动模式（可选）：你勾选“使用实际数据”后，就可以直接填 平台费金额 / 运费金额，费率输入仍保留（方便回退）
+
+
+并且：费比、进项税、利润计算全部以最终采用的“平台费/运费金额”为准。
+
+下面是你要的 一份完整可用代码（直接替换你当前的 index.html）：
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,14 +15,8 @@
   <title>WWWAQUA 计划看板（费比优先｜按月+汇总）</title>
   <style>
     :root{
-      --bg:#0b1220;
-      --text:#eaf0ff;
-      --muted:#9fb0d0;
-      --line:rgba(255,255,255,.08);
-      --good:#22c55e;
-      --warn:#f59e0b;
-      --bad:#ef4444;
-      --shadow:0 18px 45px rgba(0,0,0,.35);
+      --bg:#0b1220; --text:#eaf0ff; --muted:#9fb0d0; --line:rgba(255,255,255,.08);
+      --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --shadow:0 18px 45px rgba(0,0,0,.35);
       --radius:18px;
     }
     *{box-sizing:border-box}
@@ -28,218 +31,93 @@
       color:var(--text);
     }
     .wrap{max-width:1240px;margin:22px auto;padding:0 14px}
-    header{
-      display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;
-      margin-bottom:14px;
-    }
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
     .title{display:flex;flex-direction:column;gap:6px}
     .title h1{margin:0;font-size:18px;letter-spacing:.3px;font-weight:800}
     .title p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
     .pill{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .chip{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.03);
-      padding:8px 10px;border-radius:999px;
-      color:var(--muted);font-size:12px;
-      display:flex;gap:8px;align-items:center;
-      white-space:nowrap;
-    }
+    .chip{border:1px solid var(--line);background:rgba(255,255,255,.03);padding:8px 10px;border-radius:999px;color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;white-space:nowrap;}
     .chip b{color:var(--text);font-weight:800}
 
-    .toolbar{
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
-      margin-bottom:12px;
-    }
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px;}
     .seg{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .seg button{
-      cursor:pointer;border:none;border-radius:999px;
-      padding:10px 12px;color:var(--text);
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      font-weight:800;font-size:12px;
-    }
-    .seg button.active{
-      background:linear-gradient(135deg, rgba(79,140,255,.85), rgba(124,58,237,.8));
-      border-color:rgba(79,140,255,.35);
-    }
-    .monthbar{
-      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.03);
-      padding:10px 12px;border-radius:14px;
-    }
+    .seg button{cursor:pointer;border:none;border-radius:999px;padding:10px 12px;color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--line);font-weight:800;font-size:12px;}
+    .seg button.active{background:linear-gradient(135deg, rgba(79,140,255,.85), rgba(124,58,237,.8));border-color:rgba(79,140,255,.35);}
+
+    .monthbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);background:rgba(255,255,255,.03);padding:10px 12px;border-radius:14px;}
     .monthbar label{font-size:12px;color:var(--muted)}
-    select,input[type="number"]{
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.16);
-      color:var(--text);
-      border-radius:12px;
-      padding:10px 10px;
-      font-size:14px;
-      outline:none;
-    }
+    select,input[type="number"]{border:1px solid var(--line);background:rgba(0,0,0,.16);color:var(--text);border-radius:12px;padding:10px 10px;font-size:14px;outline:none;}
     .btns{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      cursor:pointer;border:none;border-radius:14px;padding:10px 12px;
-      color:var(--text);font-weight:900;font-size:12px;
-      background:linear-gradient(135deg, rgba(79,140,255,.85), rgba(124,58,237,.8));
-    }
-    .btn.secondary{
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--line);
-    }
-    .btn.danger{
-      background:rgba(239,68,68,.14);
-      border:1px solid rgba(239,68,68,.25);
-    }
+    .btn{cursor:pointer;border:none;border-radius:14px;padding:10px 12px;color:var(--text);font-weight:900;font-size:12px;background:linear-gradient(135deg, rgba(79,140,255,.85), rgba(124,58,237,.8));}
+    .btn.secondary{background:rgba(255,255,255,.06);border:1px solid var(--line);}
+    .btn.danger{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.25);}
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap:14px;
-    }
-    @media (max-width: 980px){
-      .grid{grid-template-columns:1fr}
-    }
+    .grid{display:grid;grid-template-columns: 1.05fr .95fr;gap:14px;}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
 
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-    .hd{
-      padding:12px 14px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);
-    }
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+    .hd{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);}
     .name{display:flex;flex-direction:column;gap:3px}
     .name strong{font-size:13px}
     .name span{font-size:12px;color:var(--muted)}
     .bd{padding:14px}
 
-    .kpis{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:10px;
-    }
+    .kpis{display:grid;grid-template-columns: repeat(4, 1fr);gap:10px;}
     @media (max-width: 980px){ .kpis{grid-template-columns: repeat(2, 1fr)} }
     @media (max-width: 420px){ .kpis{grid-template-columns: 1fr} }
 
-    .kpi{
-      padding:12px;border-radius:16px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
-      position:relative;overflow:hidden;
-    }
-    .kpi::before{
-      content:"";
-      position:absolute;inset:-40% -60%;
-      background:radial-gradient(circle at 30% 30%, rgba(79,140,255,.20), transparent 55%);
-      transform:rotate(10deg);
-      pointer-events:none;
-    }
+    .kpi{padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.18);position:relative;overflow:hidden;}
+    .kpi::before{content:"";position:absolute;inset:-40% -60%;background:radial-gradient(circle at 30% 30%, rgba(79,140,255,.20), transparent 55%);transform:rotate(10deg);pointer-events:none;}
     .kpi .lbl{color:var(--muted);font-size:12px;margin-bottom:6px;position:relative}
     .kpi .val{font-size:18px;font-weight:900;letter-spacing:.2px;position:relative}
     .kpi .sub{margin-top:6px;color:var(--muted);font-size:12px;position:relative}
 
-    /* Fee ratio FIRST and BIG */
-    .fee{
-      grid-column: 1 / -1;
-      background:linear-gradient(135deg, rgba(79,140,255,.26), rgba(124,58,237,.20));
-      border-color: rgba(79,140,255,.40);
-      padding:16px;
-    }
+    .fee{grid-column: 1 / -1;background:linear-gradient(135deg, rgba(79,140,255,.26), rgba(124,58,237,.20));border-color: rgba(79,140,255,.40);padding:16px;}
     .fee .val{font-size:46px;letter-spacing:.6px}
-    .meter{
-      margin-top:10px;height:10px;border-radius:999px;
-      background:rgba(255,255,255,.10);overflow:hidden;
-    }
-    .bar{
-      height:100%;width:0%;
-      background:linear-gradient(90deg, var(--good), var(--warn), var(--bad));
-      border-radius:999px;
-      transition:width .25s ease;
-    }
-    .badge{
-      display:inline-flex;align-items:center;gap:6px;
-      font-size:12px;font-weight:900;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
-      white-space:nowrap;
-    }
+    .meter{margin-top:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg, var(--good), var(--warn), var(--bad));border-radius:999px;transition:width .25s ease;}
+
+    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);white-space:nowrap;}
     .dot{width:8px;height:8px;border-radius:99px;background:var(--muted)}
     .badge.good .dot{background:var(--good)}
     .badge.warn .dot{background:var(--warn)}
     .badge.bad .dot{background:var(--bad)}
 
-    .form{
-      display:grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap:10px;
-    }
+    .form{display:grid;grid-template-columns: repeat(2, 1fr);gap:10px;}
     @media (max-width: 520px){ .form{grid-template-columns:1fr} }
-    .field{
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px 12px 10px;
-      background:rgba(0,0,0,.16);
-    }
-    .field label{
-      display:flex;align-items:center;justify-content:space-between;gap:8px;
-      color:var(--muted);font-size:12px;margin-bottom:8px;
-    }
+    .field{border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;background:rgba(0,0,0,.16);}
+    .field label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;margin-bottom:8px;}
     .field label small{color:rgba(159,176,208,.85)}
-    .field input{
-      width:100%;
-      border:none;outline:none;background:transparent;
-      color:var(--text);font-size:16px;font-weight:900;
-      padding:6px 2px 2px;
-    }
+    .field input{width:100%;border:none;outline:none;background:transparent;color:var(--text);font-size:16px;font-weight:900;padding:6px 2px 2px;}
     .field input::placeholder{color:rgba(159,176,208,.5)}
-    .hint{
-      margin-top:10px;color:var(--muted);
-      font-size:12px;line-height:1.55;
-    }
+    .hint{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.55;}
 
-    table{
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0;
+    .toggleRow{
+      margin-top:10px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
       border:1px solid var(--line);
-      border-radius:16px;
       background:rgba(0,0,0,.14);
-      overflow:hidden;
+      border-radius:14px;
+      padding:10px 12px;
+      color:var(--muted);
+      font-size:12px;
     }
+    .toggleRow b{color:var(--text)}
+    .switch{
+      display:flex;align-items:center;gap:10px;user-select:none;
+    }
+    .switch input{width:18px;height:18px;accent-color:#6d7cff}
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.14);overflow:hidden;}
     th,td{padding:10px 10px;font-size:12px}
-    th{
-      text-align:left;color:rgba(234,240,255,.9);
-      background:rgba(255,255,255,.04);
-      border-bottom:1px solid var(--line);
-      font-weight:900;
-    }
+    th{text-align:left;color:rgba(234,240,255,.9);background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);font-weight:900;}
     td{color:var(--muted);border-bottom:1px solid rgba(255,255,255,.06)}
     tr:last-child td{border-bottom:none}
     td b{color:var(--text)}
     .right{text-align:right}
     .mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;}
-    .warnbox{
-      margin-top:12px;padding:12px;border-radius:16px;
-      border:1px solid rgba(245,158,11,.25);
-      background:rgba(245,158,11,.08);
-      color:rgba(255,236,198,.92);
-      font-size:12px;line-height:1.5;
-      display:none;
-    }
+    .warnbox{margin-top:12px;padding:12px;border-radius:16px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.08);color:rgba(255,236,198,.92);font-size:12px;line-height:1.5;display:none;}
     .warnbox.show{display:block}
-    .footer{
-      margin:14px 0 0;
-      color:rgba(159,176,208,.85);
-      font-size:12px;line-height:1.5
-    }
+    .footer{margin:14px 0 0;color:rgba(159,176,208,.85);font-size:12px;line-height:1.5}
     code{color:#cfe3ff}
   </style>
 </head>
@@ -252,7 +130,7 @@
         仅保留一项收入：<b>净支付金额</b>（=含税销售收入）。<br/>
         成本仅输入<b>单个成本</b>（默认200），用 <code>销量=净支付÷单价</code> 反推当月成本总额。<br/>
         默认：费比红线 <b>28%</b>｜平台费率 <b>10%</b>｜快递费率 <b>5%</b>｜VAT 13%｜平台/投流票 6%｜所得税 ≤300万 5% / 超额 25%。<br/>
-        <b>点“计算”才刷新</b>（避免输入时跳动）。
+        <b>点“计算”才刷新</b>。
       </p>
     </div>
     <div class="pill">
@@ -320,10 +198,7 @@
         </div>
 
         <div class="warnbox" id="warnBox"></div>
-
-        <div class="footer">
-          离线使用：保存为 <code>index.html</code>，浏览器打开即可。数据保存在本地缓存（清缓存会丢）。
-        </div>
+        <div class="footer">离线使用：保存为 <code>index.html</code>，浏览器打开即可。数据保存在本地缓存。</div>
       </div>
     </div>
 
@@ -332,7 +207,7 @@
       <div class="hd">
         <div class="name">
           <strong>输入区</strong>
-          <span>净支付是唯一收入项；成本按单个成本反推</span>
+          <span>平台/运费默认自动算，可切换为“实际金额”</span>
         </div>
         <button class="btn" style="padding:10px 12px" onclick="calculate()">计算</button>
       </div>
@@ -360,17 +235,17 @@
           </div>
 
           <div class="field">
-            <label>平台费（含税）<small>=净支付×费率</small></label>
-            <input id="platformFee" type="number" step="0.01" disabled placeholder="点击计算自动填充">
+            <label>平台费（含税）<small id="platformHint">自动=净支付×费率</small></label>
+            <input id="platformFee" type="number" step="0.01" placeholder="默认自动计算">
           </div>
 
           <div class="field">
-            <label>运费（含税）<small>=净支付×费率</small></label>
-            <input id="shipFee" type="number" step="0.01" disabled placeholder="点击计算自动填充">
+            <label>运费（含税）<small id="shipHint">自动=净支付×费率</small></label>
+            <input id="shipFee" type="number" step="0.01" placeholder="默认自动计算">
           </div>
 
           <div class="field">
-            <label>单价（固定）<small>默认 600</small></label>
+            <label>单价（可调）<small>默认 600</small></label>
             <input id="unitPrice" type="number" step="0.01" placeholder="600">
           </div>
 
@@ -380,8 +255,20 @@
           </div>
         </div>
 
+        <div class="toggleRow">
+          <div>
+            <b>平台/运费取值模式：</b>
+            <span id="modeText">自动（按费率计算）</span>
+          </div>
+          <div class="switch">
+            <label class="mono">使用实际金额</label>
+            <input id="useActualFees" type="checkbox">
+          </div>
+        </div>
+
         <div class="hint">
-          反推：<b>销量 = 净支付 ÷ 单价</b>；<b>成本总额 = 销量 × 单个成本</b>。<br/>
+          自动模式：平台费=净支付×平台费率；运费=净支付×快递费率。<br/>
+          实际模式：直接填“平台费/运费”金额（费率仍保留，方便回退）。<br/>
           VAT：销项=销售×13/113；进项=成本×13/113 + 运费×13/113 + 平台×6/106 + 投流×6/106。
         </div>
 
@@ -395,71 +282,19 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><b>费比</b></td>
-                <td class="right"><b id="t_fee">—</b></td>
-                <td class="right">≤ 28.00%</td>
-              </tr>
-              <tr>
-                <td>渠道费用合计</td>
-                <td class="right" id="t_channel">—</td>
-                <td class="right">投流+平台+运费</td>
-              </tr>
-              <tr>
-                <td>估算销量</td>
-                <td class="right" id="t_qty">—</td>
-                <td class="right">净支付÷单价</td>
-              </tr>
-              <tr>
-                <td>成本总额</td>
-                <td class="right" id="t_cost_total">—</td>
-                <td class="right">销量×单个成本</td>
-              </tr>
-              <tr>
-                <td>销项税</td>
-                <td class="right" id="t_vat_out">—</td>
-                <td class="right">销售×13/113</td>
-              </tr>
-              <tr>
-                <td>进项税（成本）</td>
-                <td class="right" id="t_vat_in_cost">—</td>
-                <td class="right">成本×13/113</td>
-              </tr>
-              <tr>
-                <td>进项税（运费）</td>
-                <td class="right" id="t_vat_in_ship">—</td>
-                <td class="right">运费×13/113</td>
-              </tr>
-              <tr>
-                <td>进项税（平台）</td>
-                <td class="right" id="t_vat_in_platform">—</td>
-                <td class="right">平台×6/106</td>
-              </tr>
-              <tr>
-                <td>进项税（投流）</td>
-                <td class="right" id="t_vat_in_ad">—</td>
-                <td class="right">投流×6/106</td>
-              </tr>
-              <tr>
-                <td><b>应交增值税</b></td>
-                <td class="right"><b id="t_vat_pay">—</b></td>
-                <td class="right">销项−进项</td>
-              </tr>
-              <tr>
-                <td><b>税前利润</b></td>
-                <td class="right"><b id="t_profit_bt">—</b></td>
-                <td class="right">收入−成本−渠道−VAT</td>
-              </tr>
-              <tr>
-                <td>企业所得税</td>
-                <td class="right" id="t_cit">—</td>
-                <td class="right">≤300万5%/超额25%</td>
-              </tr>
-              <tr>
-                <td><b>税后净利润</b></td>
-                <td class="right"><b id="t_profit_at">—</b></td>
-                <td class="right">税前−所得税</td>
-              </tr>
+              <tr><td><b>费比</b></td><td class="right"><b id="t_fee">—</b></td><td class="right">≤ 28.00%</td></tr>
+              <tr><td>渠道费用合计</td><td class="right" id="t_channel">—</td><td class="right">投流+平台+运费</td></tr>
+              <tr><td>估算销量</td><td class="right" id="t_qty">—</td><td class="right">净支付÷单价</td></tr>
+              <tr><td>成本总额</td><td class="right" id="t_cost_total">—</td><td class="right">销量×单个成本</td></tr>
+              <tr><td>销项税</td><td class="right" id="t_vat_out">—</td><td class="right">销售×13/113</td></tr>
+              <tr><td>进项税（成本）</td><td class="right" id="t_vat_in_cost">—</td><td class="right">成本×13/113</td></tr>
+              <tr><td>进项税（运费）</td><td class="right" id="t_vat_in_ship">—</td><td class="right">运费×13/113</td></tr>
+              <tr><td>进项税（平台）</td><td class="right" id="t_vat_in_platform">—</td><td class="right">平台×6/106</td></tr>
+              <tr><td>进项税（投流）</td><td class="right" id="t_vat_in_ad">—</td><td class="right">投流×6/106</td></tr>
+              <tr><td><b>应交增值税</b></td><td class="right"><b id="t_vat_pay">—</b></td><td class="right">销项−进项</td></tr>
+              <tr><td><b>税前利润</b></td><td class="right"><b id="t_profit_bt">—</b></td><td class="right">收入−成本−渠道−VAT</td></tr>
+              <tr><td>企业所得税</td><td class="right" id="t_cit">—</td><td class="right">≤300万5%/超额25%</td></tr>
+              <tr><td><b>税后净利润</b></td><td class="right"><b id="t_profit_at">—</b></td><td class="right">税前−所得税</td></tr>
             </tbody>
           </table>
         </div>
@@ -471,19 +306,19 @@
 
 <script>
   const $ = (id)=>document.getElementById(id);
-  const STORE_KEY = "WWWAQUA_DASHBOARD_V6";
+  const STORE_KEY = "WWWAQUA_DASHBOARD_V7";
   const MONTHS = Array.from({length:12}, (_,i)=>String(i+1).padStart(2,"0"));
 
-  // ===== Defaults (fixed rules) =====
-  const FEE_CAP = 0.28;          // 28%
-  const DEF_PLATFORM_RATE = 10;  // %
-  const DEF_SHIP_RATE = 5;       // %
+  // Defaults (fixed rules)
+  const FEE_CAP = 0.28;
+  const DEF_PLATFORM_RATE = 10;
+  const DEF_SHIP_RATE = 5;
   const DEF_UNIT_PRICE = 600;
   const DEF_UNIT_COST  = 200;
 
   const VAT13 = 0.13;
   const VAT6  = 0.06;
-  const CIT_THRESHOLD = 3000000; // 300万
+  const CIT_THRESHOLD = 3000000;
   const CIT_LOW = 0.05;
   const CIT_HIGH = 0.25;
 
@@ -502,6 +337,9 @@
     adSpend: 0,
     platformRate: DEF_PLATFORM_RATE,
     shipRate: DEF_SHIP_RATE,
+    platformFeeActual: 0,
+    shipFeeActual: 0,
+    useActualFees: false,
     unitPrice: DEF_UNIT_PRICE,
     unitCost: DEF_UNIT_COST,
   });
@@ -555,29 +393,90 @@
     saveState();
     $("monthName").textContent = state.month + "月";
     renderInputs();
+    applyFeeModeUI();
   }
   window.onMonthChange = onMonthChange;
 
+  function applyFeeModeUI(){
+    const d = state.months[state.month];
+    const useActual = !!d.useActualFees;
+
+    $("useActualFees").checked = useActual;
+    $("modeText").textContent = useActual ? "实际（手动填金额）" : "自动（按费率计算）";
+
+    // If auto mode: lock fee amount inputs (readonly feel), but still show value after calculate
+    $("platformFee").readOnly = !useActual;
+    $("shipFee").readOnly = !useActual;
+
+    $("platformHint").textContent = useActual ? "手动填：平台费金额" : "自动=净支付×费率";
+    $("shipHint").textContent = useActual ? "手动填：运费金额" : "自动=净支付×费率";
+
+    // Visual cue
+    $("platformFee").style.opacity = useActual ? "1" : "0.85";
+    $("shipFee").style.opacity = useActual ? "1" : "0.85";
+  }
+
   function renderInputs(){
     const d = state.months[state.month];
-    $("netPay").value = (d.netPay || d.netPay===0) ? (d.netPay || "") : "";
-    $("adSpend").value = (d.adSpend || d.adSpend===0) ? (d.adSpend || "") : "";
+
+    $("netPay").value = d.netPay ? d.netPay : "";
+    $("adSpend").value = d.adSpend ? d.adSpend : "";
+
     $("platformRate").value = (d.platformRate ?? DEF_PLATFORM_RATE);
     $("shipRate").value = (d.shipRate ?? DEF_SHIP_RATE);
+
     $("unitPrice").value = (d.unitPrice ?? DEF_UNIT_PRICE);
     $("unitCost").value = (d.unitCost ?? DEF_UNIT_COST);
 
-    $("platformFee").value = "";
-    $("shipFee").value = "";
+    // For fee amount boxes, show actual stored if in actual mode, else keep blank until calculate
+    if(d.useActualFees){
+      $("platformFee").value = d.platformFeeActual ? d.platformFeeActual : "";
+      $("shipFee").value = d.shipFeeActual ? d.shipFeeActual : "";
+    }else{
+      $("platformFee").value = "";
+      $("shipFee").value = "";
+    }
+
+    $("useActualFees").checked = !!d.useActualFees;
+    $("modeText").textContent = d.useActualFees ? "实际（手动填金额）" : "自动（按费率计算）";
   }
 
   function bindInputs(){
+    // basic
     ["netPay","adSpend","platformRate","shipRate","unitPrice","unitCost"].forEach(id=>{
       $(id).addEventListener("input", ()=>{
         const d = state.months[state.month];
         d[id] = num($(id).value);
         saveState();
       });
+    });
+
+    // fee amount (actual)
+    $("platformFee").addEventListener("input", ()=>{
+      const d = state.months[state.month];
+      d.platformFeeActual = num($("platformFee").value);
+      saveState();
+    });
+    $("shipFee").addEventListener("input", ()=>{
+      const d = state.months[state.month];
+      d.shipFeeActual = num($("shipFee").value);
+      saveState();
+    });
+
+    // mode toggle
+    $("useActualFees").addEventListener("change", ()=>{
+      const d = state.months[state.month];
+      d.useActualFees = $("useActualFees").checked;
+      saveState();
+      applyFeeModeUI();
+      // In auto mode, clear amount fields to reduce confusion until calculate
+      if(!d.useActualFees){
+        $("platformFee").value = "";
+        $("shipFee").value = "";
+      }else{
+        $("platformFee").value = d.platformFeeActual ? d.platformFeeActual : "";
+        $("shipFee").value = d.shipFeeActual ? d.shipFeeActual : "";
+      }
     });
   }
 
@@ -588,6 +487,7 @@
     state.months[state.month] = {...state.months[prev]};
     saveState();
     renderInputs();
+    applyFeeModeUI();
   }
   window.copyPrevMonth = copyPrevMonth;
 
@@ -596,30 +496,49 @@
     state.months[state.month] = emptyMonth();
     saveState();
     renderInputs();
+    applyFeeModeUI();
   }
   window.clearMonth = clearMonth;
 
   function sumYear(){
-    // 汇总只加总净支付与投流；费率/单价/单成本用当月默认（可在右侧输入后用于计算）
     const out = emptyMonth();
     out.netPay = 0;
     out.adSpend = 0;
+    out.platformFeeActual = 0;
+    out.shipFeeActual = 0;
+
     for(const m of MONTHS){
       const d = state.months[m];
       out.netPay += num(d.netPay);
       out.adSpend += num(d.adSpend);
+
+      // If month uses actual fees, add them; else auto-calc at month level and add
+      const pr = (num(d.platformRate) || DEF_PLATFORM_RATE) / 100;
+      const sr = (num(d.shipRate) || DEF_SHIP_RATE) / 100;
+
+      if(d.useActualFees){
+        out.platformFeeActual += num(d.platformFeeActual);
+        out.shipFeeActual += num(d.shipFeeActual);
+      }else{
+        out.platformFeeActual += num(d.netPay) * pr;
+        out.shipFeeActual += num(d.netPay) * sr;
+      }
     }
-    // 年汇总：取当前输入框里的费率/单价/单成本（方便你做年度统一假设）
+
+    // Year view: fees are treated as "actual totals" (avoid re-calculating on total netPay)
+    out.useActualFees = true;
     out.platformRate = num($("platformRate").value) || DEF_PLATFORM_RATE;
     out.shipRate = num($("shipRate").value) || DEF_SHIP_RATE;
+
+    // For annual cost model, take the current assumed unit price/cost in the input boxes
     out.unitPrice = num($("unitPrice").value) || DEF_UNIT_PRICE;
     out.unitCost = num($("unitCost").value) || DEF_UNIT_COST;
+
     return out;
   }
 
   function calculate(){
     const data = (state.view === "year") ? sumYear() : state.months[state.month];
-
     const netPay = num(data.netPay);
     const adSpend = num(data.adSpend);
 
@@ -629,30 +548,48 @@
     const unitPrice = num(data.unitPrice) || DEF_UNIT_PRICE;
     const unitCost  = num(data.unitCost)  || DEF_UNIT_COST;
 
-    // 平台/运费按净支付比例自动算
-    const platformFee = netPay * platformRate;
-    const shipFee = netPay * shipRate;
+    // Platform & shipping fees: auto or actual
+    let platformFee = 0, shipFee = 0;
 
+    if(data.useActualFees){
+      platformFee = num(data.platformFeeActual);
+      shipFee = num(data.shipFeeActual);
+    }else{
+      platformFee = netPay * platformRate;
+      shipFee = netPay * shipRate;
+    }
+
+    // Reflect on UI
     $("platformFee").value = isFinite(platformFee) ? platformFee.toFixed(2) : "";
     $("shipFee").value = isFinite(shipFee) ? shipFee.toFixed(2) : "";
 
-    // 费比
+    // If month view and actual mode, persist latest typed values (in case user only typed, not blur)
+    if(state.view === "month"){
+      const d = state.months[state.month];
+      if(d.useActualFees){
+        d.platformFeeActual = platformFee;
+        d.shipFeeActual = shipFee;
+        saveState();
+      }
+    }
+
+    // Fee ratio
     const channelCost = adSpend + platformFee + shipFee;
     const feeRatio = netPay > 0 ? channelCost / netPay : NaN;
     const feeRoom = netPay > 0 ? (FEE_CAP - feeRatio) * netPay : NaN;
 
-    // 可加投流上限（不突破28%）
+    // Ad cap
     const maxChannelCost = netPay * FEE_CAP;
     const addAdCap = maxChannelCost - channelCost;
 
-    // 销售额=净支付（唯一收入项）
+    // Sales = netPay
     const sales = netPay;
 
-    // 反推销量与成本
+    // Qty & cost total
     const qty = (unitPrice > 0) ? (sales / unitPrice) : 0;
     const costTotal = qty * unitCost;
 
-    // VAT（进项包含：成本13%、运费13%、平台6%、投流6%）
+    // VAT (full credits)
     const vatOut = sales * (VAT13 / (1 + VAT13));
     const vatInCost = costTotal * (VAT13 / (1 + VAT13));
     const vatInShip = shipFee * (VAT13 / (1 + VAT13));
@@ -660,7 +597,7 @@
     const vatInAd = adSpend * (VAT6 / (1 + VAT6));
     const vatPay = vatOut - (vatInCost + vatInShip + vatInPlatform + vatInAd);
 
-    // 利润
+    // Profit
     const profitBT = sales - costTotal - channelCost - vatPay;
 
     let cit = 0;
@@ -670,10 +607,11 @@
 
     const profitAT = profitBT - cit;
 
-    // ===== KPI render =====
+    // KPI render
     $("feeRatio").textContent = fmtPct(feeRatio);
     $("channelCost").textContent = fmtMoney(channelCost);
     $("netPayShow").textContent = fmtMoney(netPay);
+
     $("feeRoom").textContent = isFinite(feeRoom)
       ? (feeRoom >= 0 ? ("+"+fmtMoney(feeRoom)) : ("-"+fmtMoney(Math.abs(feeRoom))))
       : "—";
@@ -738,17 +676,17 @@
     $("t_cit").textContent = fmtMoney(cit);
     $("t_profit_at").textContent = fmtMoney(profitAT);
 
-    // pills
     $("viewName").textContent = state.view === "month" ? "当月" : "全年汇总";
     $("monthName").textContent = state.month + "月";
   }
   window.calculate = calculate;
 
-  // ===== init =====
+  // init
   loadState();
   buildMonthOptions();
   bindInputs();
   renderInputs();
+  applyFeeModeUI();
   setView(state.view);
 </script>
 </body>
