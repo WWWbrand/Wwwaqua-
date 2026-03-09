@@ -1,693 +1,571 @@
-没问题 ✅ 我给你把“平台费/运费”做成 两种模式：
-
-自动模式（默认）：平台费 = 净支付×平台费率；运费 = 净支付×快递费率
-手动模式（可选）：你勾选“使用实际数据”后，就可以直接填 平台费金额 / 运费金额，费率输入仍保留（方便回退）
-
-
-并且：费比、进项税、利润计算全部以最终采用的“平台费/运费金额”为准。
-
-下面是你要的 一份完整可用代码（直接替换你当前的 index.html）：
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WWWAQUA 计划看板（费比优先｜按月+汇总）</title>
-  <style>
-    :root{
-      --bg:#0b1220; --text:#eaf0ff; --muted:#9fb0d0; --line:rgba(255,255,255,.08);
-      --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --shadow:0 18px 45px rgba(0,0,0,.35);
-      --radius:18px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC","Microsoft YaHei", Arial;
-      background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(79,140,255,.18), transparent 55%),
-        radial-gradient(1000px 500px at 85% 20%, rgba(124,58,237,.15), transparent 55%),
-        radial-gradient(900px 550px at 40% 95%, rgba(34,197,94,.10), transparent 55%),
-        var(--bg);
-      color:var(--text);
-    }
-    .wrap{max-width:1240px;margin:22px auto;padding:0 14px}
-    header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
-    .title{display:flex;flex-direction:column;gap:6px}
-    .title h1{margin:0;font-size:18px;letter-spacing:.3px;font-weight:800}
-    .title p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
-    .pill{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .chip{border:1px solid var(--line);background:rgba(255,255,255,.03);padding:8px 10px;border-radius:999px;color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;white-space:nowrap;}
-    .chip b{color:var(--text);font-weight:800}
-
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px;}
-    .seg{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .seg button{cursor:pointer;border:none;border-radius:999px;padding:10px 12px;color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--line);font-weight:800;font-size:12px;}
-    .seg button.active{background:linear-gradient(135deg, rgba(79,140,255,.85), rgba(124,58,237,.8));border-color:rgba(79,140,255,.35);}
-
-    .monthbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);background:rgba(255,255,255,.03);padding:10px 12px;border-radius:14px;}
-    .monthbar label{font-size:12px;color:var(--muted)}
-    select,input[type="number"]{border:1px solid var(--line);background:rgba(0,0,0,.16);color:var(--text);border-radius:12px;padding:10px 10px;font-size:14px;outline:none;}
-    .btns{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{cursor:pointer;border:none;border-radius:14px;padding:10px 12px;color:var(--text);font-weight:900;font-size:12px;background:linear-gradient(135deg, rgba(79,140,255,.85), rgba(124,58,237,.8));}
-    .btn.secondary{background:rgba(255,255,255,.06);border:1px solid var(--line);}
-    .btn.danger{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.25);}
-
-    .grid{display:grid;grid-template-columns: 1.05fr .95fr;gap:14px;}
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
-
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
-    .hd{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);}
-    .name{display:flex;flex-direction:column;gap:3px}
-    .name strong{font-size:13px}
-    .name span{font-size:12px;color:var(--muted)}
-    .bd{padding:14px}
-
-    .kpis{display:grid;grid-template-columns: repeat(4, 1fr);gap:10px;}
-    @media (max-width: 980px){ .kpis{grid-template-columns: repeat(2, 1fr)} }
-    @media (max-width: 420px){ .kpis{grid-template-columns: 1fr} }
-
-    .kpi{padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.18);position:relative;overflow:hidden;}
-    .kpi::before{content:"";position:absolute;inset:-40% -60%;background:radial-gradient(circle at 30% 30%, rgba(79,140,255,.20), transparent 55%);transform:rotate(10deg);pointer-events:none;}
-    .kpi .lbl{color:var(--muted);font-size:12px;margin-bottom:6px;position:relative}
-    .kpi .val{font-size:18px;font-weight:900;letter-spacing:.2px;position:relative}
-    .kpi .sub{margin-top:6px;color:var(--muted);font-size:12px;position:relative}
-
-    .fee{grid-column: 1 / -1;background:linear-gradient(135deg, rgba(79,140,255,.26), rgba(124,58,237,.20));border-color: rgba(79,140,255,.40);padding:16px;}
-    .fee .val{font-size:46px;letter-spacing:.6px}
-    .meter{margin-top:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;}
-    .bar{height:100%;width:0%;background:linear-gradient(90deg, var(--good), var(--warn), var(--bad));border-radius:999px;transition:width .25s ease;}
-
-    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);white-space:nowrap;}
-    .dot{width:8px;height:8px;border-radius:99px;background:var(--muted)}
-    .badge.good .dot{background:var(--good)}
-    .badge.warn .dot{background:var(--warn)}
-    .badge.bad .dot{background:var(--bad)}
-
-    .form{display:grid;grid-template-columns: repeat(2, 1fr);gap:10px;}
-    @media (max-width: 520px){ .form{grid-template-columns:1fr} }
-    .field{border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;background:rgba(0,0,0,.16);}
-    .field label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;margin-bottom:8px;}
-    .field label small{color:rgba(159,176,208,.85)}
-    .field input{width:100%;border:none;outline:none;background:transparent;color:var(--text);font-size:16px;font-weight:900;padding:6px 2px 2px;}
-    .field input::placeholder{color:rgba(159,176,208,.5)}
-    .hint{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.55;}
-
-    .toggleRow{
-      margin-top:10px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.14);
-      border-radius:14px;
-      padding:10px 12px;
-      color:var(--muted);
-      font-size:12px;
-    }
-    .toggleRow b{color:var(--text)}
-    .switch{
-      display:flex;align-items:center;gap:10px;user-select:none;
-    }
-    .switch input{width:18px;height:18px;accent-color:#6d7cff}
-    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.14);overflow:hidden;}
-    th,td{padding:10px 10px;font-size:12px}
-    th{text-align:left;color:rgba(234,240,255,.9);background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);font-weight:900;}
-    td{color:var(--muted);border-bottom:1px solid rgba(255,255,255,.06)}
-    tr:last-child td{border-bottom:none}
-    td b{color:var(--text)}
-    .right{text-align:right}
-    .mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;}
-    .warnbox{margin-top:12px;padding:12px;border-radius:16px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.08);color:rgba(255,236,198,.92);font-size:12px;line-height:1.5;display:none;}
-    .warnbox.show{display:block}
-    .footer{margin:14px 0 0;color:rgba(159,176,208,.85);font-size:12px;line-height:1.5}
-    code{color:#cfe3ff}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>税务方案对比 · 修正内销配件成本</title>
+    <!-- Chart.js & Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; }
+        body { background: #eef3f9; padding: 24px; display: flex; justify-content: center; }
+        .container { max-width: 1500px; width: 100%; background: white; border-radius: 40px; box-shadow: 0 30px 60px -15px #1b3f60; padding: 36px; }
+        h1 { font-size: 2.4rem; font-weight: 700; color: #0b2e4a; display: flex; align-items: center; gap: 12px; }
+        .badge { background: #1d6fb0; color: white; padding: 4px 18px; border-radius: 60px; font-size: 1.1rem; margin-left: 16px; }
+        .sub { background: #e1effb; border-left: 8px solid #1d6fb0; padding: 18px 28px; border-radius: 50px; margin: 20px 0 30px; color: #154a73; font-weight: 500; }
+        .input-panel { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-bottom: 30px; }
+        .card { background: #f9fcff; border-radius: 32px; padding: 26px; border: 1px solid #d1e2f5; box-shadow: 0 6px 14px rgba(0,40,70,0.04); }
+        .card h3 { color: #1b4f7a; margin-bottom: 20px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .input-row label { font-weight: 600; color: #1e4b73; width: 150px; }
+        .input-row input { width: 150px; padding: 10px 16px; border: 1px solid #b9d2ec; border-radius: 40px; font-size: 1rem; text-align: right; background: white; }
+        .param-bar { background: #e5f0fd; border-radius: 60px; padding: 22px 36px; margin: 30px 0; display: flex; flex-wrap: wrap; gap: 30px; align-items: center; }
+        .param-item { display: flex; align-items: center; gap: 10px; }
+        .param-item label { font-weight: 600; color: #124571; min-width: 140px; }
+        .param-item input { width: 100px; padding: 8px 12px; border-radius: 40px; border: 1px solid #aac3df; text-align: right; }
+        .param-item .wide { width: 130px; }
+        button { background: #0f4c81; border: none; color: white; font-weight: 700; padding: 16px 44px; border-radius: 60px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 8px 20px #0f4c8140; transition: 0.2s; margin-bottom: 10px; }
+        button:hover { background: #0a3760; transform: translateY(-3px); }
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin: 40px 0; }
+        .result-box { background: #ffffff; border-radius: 36px; padding: 30px; box-shadow: 0 15px 30px #d0e0f0; border: 1px solid #c0d6f0; }
+        .result-box h2 { font-size: 1.9rem; border-bottom: 3px solid #aac6e8; padding-bottom: 16px; margin-bottom: 24px; color: #0b3e64; }
+        .detail-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #b8d2ed; font-size: 1rem; }
+        .total { font-size: 1.6rem; font-weight: 700; color: #004b87; margin-top: 18px; padding-top: 18px; border-top: 3px solid #004b87; }
+        .red-text { color: #c0392b !important; font-weight: 700; }
+        .chart-box { background: #ffffff; border-radius: 36px; padding: 30px; margin: 30px 0; border: 1px solid #c0d6f0; }
+        canvas { width: 100%; height: 400px; }
+        .insight { background: #fef8e7; border-left: 8px solid #f3b34c; border-radius: 32px; padding: 28px; margin-top: 28px; }
+        .insight h3 { color: #a55d0a; font-size: 1.6rem; margin-bottom: 16px; }
+        .footnote { color: #4d6f91; text-align: center; margin-top: 36px; font-size: 0.95rem; }
+        .warning-icon { color: #e67e22; margin-left: 6px; }
+        input::placeholder { color: #b0c4de; font-style: italic; }
+    </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="title">
-      <h1>WWWAQUA 计划看板（费比优先｜按月+汇总）</h1>
-      <p class="mono">
-        仅保留一项收入：<b>净支付金额</b>（=含税销售收入）。<br/>
-        成本仅输入<b>单个成本</b>（默认200），用 <code>销量=净支付÷单价</code> 反推当月成本总额。<br/>
-        默认：费比红线 <b>28%</b>｜平台费率 <b>10%</b>｜快递费率 <b>5%</b>｜VAT 13%｜平台/投流票 6%｜所得税 ≤300万 5% / 超额 25%。<br/>
-        <b>点“计算”才刷新</b>。
-      </p>
-    </div>
-    <div class="pill">
-      <div class="chip">视图：<b id="viewName">当月</b></div>
-      <div class="chip">当前月份：<b id="monthName">01月</b></div>
-    </div>
-  </header>
+<div id="app" class="container">
+    <h1><i class="fa fa-calculator"></i> 税务方案对比 <span class="badge">内销配件成本已修正</span></h1>
+    <div class="sub"><i class="fa fa-info-circle"></i> 所有数值请自行填写（留空或无效输入按0处理）。点击按钮更新结果和图表。</div>
 
-  <div class="toolbar">
-    <div class="seg">
-      <button id="btnMonth" class="active" onclick="setView('month')">当月</button>
-      <button id="btnYear" onclick="setView('year')">全年汇总</button>
-    </div>
-    <div class="monthbar">
-      <label>月份</label>
-      <select id="monthSel" onchange="onMonthChange()"></select>
-      <div class="btns">
-        <button class="btn secondary" onclick="copyPrevMonth()">复制上月</button>
-        <button class="btn danger" onclick="clearMonth()">清空本月</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid">
-    <!-- LEFT KPIs -->
-    <div class="card">
-      <div class="hd">
-        <div class="name">
-          <strong>总览</strong>
-          <span>费比： (投流+平台+运费) ÷ 净支付</span>
+    <!-- 三大板块输入 -->
+    <div class="input-panel">
+        <div class="card">
+            <h3><i class="fa fa-shopping-cart"></i> 电商板块 (NA)</h3>
+            <div class="input-row"><label>售价(含13%):</label><input type="number" v-model.number="ecom.price" placeholder=""></div>
+            <div class="input-row"><label>采购成本(含13%):</label><input type="number" v-model.number="ecom.cost" placeholder=""></div>
+            <div class="input-row"><label>销售数量:</label><input type="number" v-model.number="ecom.qty" placeholder=""></div>
         </div>
-        <span id="feeBadge" class="badge"><span class="dot"></span><span id="feeStatusText">—</span></span>
-      </div>
+        <div class="card">
+            <h3><i class="fa fa-globe"></i> 外贸板块 (NA)</h3>
+            <div class="input-row"><label>现状售价(含13%):</label><input type="number" v-model.number="foreign.priceCurrent" placeholder=""></div>
+            <div class="input-row"><label>避税售价(免税价):</label><input type="number" v-model.number="foreign.pricePlan" placeholder=""></div>
+            <div class="input-row"><label>采购成本(含13%):</label><input type="number" v-model.number="foreign.cost" placeholder=""></div>
+            <div class="input-row"><label>销售数量:</label><input type="number" v-model.number="foreign.qty" placeholder=""></div>
+        </div>
+        <div class="card">
+            <h3><i class="fa fa-store"></i> 内销板块 (D公司)</h3>
+            <div class="input-row"><label>售价(含13%):</label><input type="number" v-model.number="domestic.price" placeholder=""></div>
+            <div class="input-row"><label>采购成本(含13%):</label><input type="number" v-model.number="domestic.cost" placeholder=""></div>
+            <div class="input-row"><label>销售数量:</label><input type="number" v-model.number="domestic.qty" placeholder=""></div>
+        </div>
+    </div>
 
-      <div class="bd">
-        <div class="kpis">
-          <div class="kpi fee">
-            <div class="lbl">电商渠道费比（≤ 28%）</div>
-            <div class="val mono" id="feeRatio">—</div>
-            <div class="sub mono">渠道费用：<span id="channelCost">—</span> ｜净支付：<span id="netPayShow">—</span></div>
-            <div class="meter"><div class="bar" id="feeBar"></div></div>
-            <div class="sub mono" style="margin-top:8px">
-              剩余空间：<span id="feeRoom">—</span>｜
-              <b>可加投流上限：</b><span id="addAdCap">—</span>
+    <!-- 全局参数 -->
+    <div class="param-bar">
+        <div class="param-item"><label>电商费比 (含6%):</label><input type="number" v-model.number="params.ecomFeeRate" step="0.1" placeholder="%"></div>
+        <div class="param-item"><label>授权费率 (含6%):</label><input type="number" v-model.number="params.royaltyRate" step="0.1" placeholder="%"></div>
+        <div class="param-item"><label>加工费 (元/个):</label><input type="number" v-model.number="params.processFee" step="0.5" placeholder=""></div>
+        <div class="param-item"><label>B卖给A单价(含13%):</label><input type="number" v-model.number="params.priceBtoA" step="1" class="wide" placeholder=""></div>
+        <div class="param-item"><label>B卖给D单价(含13%):</label><input type="number" v-model.number="params.priceBtoD" step="1" class="wide" placeholder=""></div>
+        <div class="param-item"><label>组装月费(B):</label><input type="number" v-model.number="params.assemblyMonth" step="1000" placeholder=""></div>
+        <div class="param-item"><label>线下月费(D):</label><input type="number" v-model.number="params.offlineMonth" step="1000" placeholder=""></div>
+        <div class="param-item"><label>退税率:</label><input type="number" v-model.number="params.rebateRate" step="0.1" placeholder="%"></div>
+        <div class="param-item"><label>A占B股权:</label><input type="number" v-model.number="params.ownershipA" step="1" placeholder="%"></div>
+        <div class="param-item"><label>A公司经营费用率:</label><input type="number" v-model.number="params.operateExpenseRate" step="0.1" placeholder="%"></div>
+    </div>
+
+    <div style="text-align: right;">
+        <button @click="updateChart"><i class="fa fa-sync-alt"></i> 更新图表与计算</button>
+    </div>
+
+    <!-- 两方案结果 -->
+    <div class="results-grid">
+        <!-- 现状 -->
+        <div class="result-box">
+            <h2><i class="fa fa-file-alt"></i> 现状 · A公司 + D公司</h2>
+            <div class="detail-line"><span>A公司电商净利润</span> <span>{{ formatMoney(current.A_ecom_net) }}</span></div>
+            <div class="detail-line" style="margin-left:20px; color:#2c5a82;">
+                增值税: {{ formatMoney(current.A_ecom_vat) }} | 附加: {{ formatMoney(current.A_ecom_surcharge) }} | 
+                所得税: <span :class="{ 'red-text': current.A_ecom_before > 3000000 }">{{ formatMoney(current.A_ecom_tax) }}</span>
+                <i v-if="current.A_ecom_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
             </div>
-          </div>
-
-          <div class="kpi">
-            <div class="lbl">应交增值税</div>
-            <div class="val mono" id="vatPay">—</div>
-            <div class="sub">销项 − 进项</div>
-          </div>
-
-          <div class="kpi">
-            <div class="lbl">税前利润</div>
-            <div class="val mono" id="profitBT">—</div>
-            <div class="sub">收入 − 成本 − 渠道费 − VAT</div>
-          </div>
-
-          <div class="kpi">
-            <div class="lbl">税后净利润</div>
-            <div class="val mono" id="profitAT">—</div>
-            <div class="sub mono">所得税：<span id="citShow">—</span></div>
-          </div>
+            <div class="detail-line"><span>A公司外贸净利润</span> <span>{{ formatMoney(current.A_foreign_net) }}</span></div>
+            <div class="detail-line" style="margin-left:20px; color:#2c5a82;">
+                增值税: {{ formatMoney(current.A_foreign_vat) }} | 附加: {{ formatMoney(current.A_foreign_surcharge) }} | 
+                所得税: <span :class="{ 'red-text': current.A_foreign_before > 3000000 }">{{ formatMoney(current.A_foreign_tax) }}</span>
+                <i v-if="current.A_foreign_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
+            </div>
+            <div class="detail-line"><span>A公司经营费用 ({{ formatPercent(params.operateExpenseRate) }} 收入)</span> <span>{{ formatMoney(current.A_operate_expense) }}</span></div>
+            <div class="detail-line"><span>A公司合计利润(税前)</span> <span>{{ formatMoney(current.A_total_before_tax) }}</span></div>
+            <div class="detail-line">
+                <span>A公司所得税(汇总)</span> 
+                <span :class="{ 'red-text': current.A_total_before_tax > 3000000 }">{{ formatMoney(current.A_total_tax) }}</span>
+                <i v-if="current.A_total_before_tax > 3000000" class="fa fa-exclamation-triangle warning-icon" title="汇总利润超300万，税率25%"></i>
+            </div>
+            <div class="detail-line total"><span>A公司净利润</span> <span>{{ formatMoney(current.A_net) }}</span></div>
+            <div class="detail-line"><span>D公司净利润</span> <span>{{ formatMoney(current.D_net) }}</span></div>
+            <div class="detail-line" style="margin-left:20px;">
+                增值税: {{ formatMoney(current.D_vat) }} | 附加: {{ formatMoney(current.D_surcharge) }} | 
+                所得税: <span :class="{ 'red-text': current.D_before > 3000000 }">{{ formatMoney(current.D_tax) }}</span>
+                <i v-if="current.D_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
+            </div>
+            <div class="detail-line total" style="font-size:1.8rem;"><span>🏁 归属A总额</span> <span>{{ formatMoney(current.total_to_A) }}</span></div>
         </div>
-
-        <div class="warnbox" id="warnBox"></div>
-        <div class="footer">离线使用：保存为 <code>index.html</code>，浏览器打开即可。数据保存在本地缓存。</div>
-      </div>
+        <!-- 避税方案 -->
+        <div class="result-box">
+            <h2><i class="fa fa-chart-line"></i> 避税方案 · A({{ formatPercent(params.ownershipA) }} B) + C + D</h2>
+            <div class="detail-line"><span>A公司电商净利润</span> <span>{{ formatMoney(plan.A_ecom_net) }}</span></div>
+            <div class="detail-line" style="margin-left:20px;">
+                增值税: {{ formatMoney(plan.A_ecom_vat) }} | 附加: {{ formatMoney(plan.A_ecom_surcharge) }} | 
+                所得税: <span :class="{ 'red-text': plan.A_ecom_before > 3000000 }">{{ formatMoney(plan.A_ecom_tax) }}</span>
+                <i v-if="plan.A_ecom_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
+            </div>
+            <div class="detail-line"><span>A品牌授权费净收入</span> <span>{{ formatMoney(plan.A_royalty_net) }}</span></div>
+            <div class="detail-line" style="margin-left:20px;">
+                销项: {{ formatMoney(plan.royalty_output) }} | 附加: {{ formatMoney(plan.royalty_surcharge) }} | 
+                所得税: <span :class="{ 'red-text': plan.royalty_before > 3000000 }">{{ formatMoney(plan.royalty_tax) }}</span>
+                <i v-if="plan.royalty_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
+            </div>
+            <div class="detail-line"><span>A公司经营费用 ({{ formatPercent(params.operateExpenseRate) }} 收入)</span> <span>{{ formatMoney(plan.A_operate_expense) }}</span></div>
+            <div class="detail-line"><span>A公司自身净利润合计</span> <span>{{ formatMoney(plan.A_self_net) }}</span></div>
+            <div class="detail-line"><span>B公司(含C)净利润</span> <span>{{ formatMoney(plan.B_withC_net) }}</span></div>
+            <div class="detail-line" style="margin-left:20px;">
+                B增值税: {{ formatMoney(plan.B_vat) }} | 附加: {{ formatMoney(plan.B_surcharge) }} | 
+                B所得税: <span :class="{ 'red-text': plan.B_before > 3000000 }">{{ formatMoney(plan.B_tax) }}</span>
+                <i v-if="plan.B_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i> | 
+                C税后: {{ formatMoney(plan.C_net) }}
+            </div>
+            <div class="detail-line"><span>其中{{ formatPercent(params.ownershipA) }}归属A</span> <span>{{ formatMoney(plan.fromB_to_A) }}</span></div>
+            <div class="detail-line"><span>D公司净利润</span> <span>{{ formatMoney(plan.D_net) }}</span></div>
+            <div class="detail-line" style="margin-left:20px;">
+                D增值税: {{ formatMoney(plan.D_vat) }} | 附加: {{ formatMoney(plan.D_surcharge) }} | 
+                所得税: <span :class="{ 'red-text': plan.D_before > 3000000 }">{{ formatMoney(plan.D_tax) }}</span>
+                <i v-if="plan.D_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
+            </div>
+            <div class="detail-line total" style="font-size:1.8rem;"><span>🏁 归属A总额</span> <span>{{ formatMoney(plan.total_to_A) }}</span></div>
+            <div class="detail-line" style="margin-top:12px; background:#ebf3fa; padding:12px; border-radius:20px;">构成: A自身 {{ formatMoney(plan.A_self_net) }} + B分得 {{ formatMoney(plan.fromB_to_A) }} + D {{ formatMoney(plan.D_net) }}</div>
+        </div>
     </div>
 
-    <!-- RIGHT Inputs + Detail -->
-    <div class="card">
-      <div class="hd">
-        <div class="name">
-          <strong>输入区</strong>
-          <span>平台/运费默认自动算，可切换为“实际金额”</span>
-        </div>
-        <button class="btn" style="padding:10px 12px" onclick="calculate()">计算</button>
-      </div>
-
-      <div class="bd">
-        <div class="form">
-          <div class="field">
-            <label>净支付金额（=含税销售收入）<small>本月/全年</small></label>
-            <input id="netPay" type="number" step="0.01" placeholder="例如 314186.68">
-          </div>
-
-          <div class="field">
-            <label>投流金额（含税）<small>6%进项</small></label>
-            <input id="adSpend" type="number" step="0.01" placeholder="例如 36268">
-          </div>
-
-          <div class="field">
-            <label>平台费率（%）<small>默认 10</small></label>
-            <input id="platformRate" type="number" step="0.01" placeholder="10">
-          </div>
-
-          <div class="field">
-            <label>快递费率（%）<small>默认 5</small></label>
-            <input id="shipRate" type="number" step="0.01" placeholder="5">
-          </div>
-
-          <div class="field">
-            <label>平台费（含税）<small id="platformHint">自动=净支付×费率</small></label>
-            <input id="platformFee" type="number" step="0.01" placeholder="默认自动计算">
-          </div>
-
-          <div class="field">
-            <label>运费（含税）<small id="shipHint">自动=净支付×费率</small></label>
-            <input id="shipFee" type="number" step="0.01" placeholder="默认自动计算">
-          </div>
-
-          <div class="field">
-            <label>单价（可调）<small>默认 600</small></label>
-            <input id="unitPrice" type="number" step="0.01" placeholder="600">
-          </div>
-
-          <div class="field">
-            <label>单个成本（可填）<small>默认 200（13%进项）</small></label>
-            <input id="unitCost" type="number" step="0.01" placeholder="200">
-          </div>
-        </div>
-
-        <div class="toggleRow">
-          <div>
-            <b>平台/运费取值模式：</b>
-            <span id="modeText">自动（按费率计算）</span>
-          </div>
-          <div class="switch">
-            <label class="mono">使用实际金额</label>
-            <input id="useActualFees" type="checkbox">
-          </div>
-        </div>
-
-        <div class="hint">
-          自动模式：平台费=净支付×平台费率；运费=净支付×快递费率。<br/>
-          实际模式：直接填“平台费/运费”金额（费率仍保留，方便回退）。<br/>
-          VAT：销项=销售×13/113；进项=成本×13/113 + 运费×13/113 + 平台×6/106 + 投流×6/106。
-        </div>
-
-        <div style="margin-top:12px">
-          <table class="mono">
-            <thead>
-              <tr>
-                <th>明细</th>
-                <th class="right">金额</th>
-                <th class="right">说明</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td><b>费比</b></td><td class="right"><b id="t_fee">—</b></td><td class="right">≤ 28.00%</td></tr>
-              <tr><td>渠道费用合计</td><td class="right" id="t_channel">—</td><td class="right">投流+平台+运费</td></tr>
-              <tr><td>估算销量</td><td class="right" id="t_qty">—</td><td class="right">净支付÷单价</td></tr>
-              <tr><td>成本总额</td><td class="right" id="t_cost_total">—</td><td class="right">销量×单个成本</td></tr>
-              <tr><td>销项税</td><td class="right" id="t_vat_out">—</td><td class="right">销售×13/113</td></tr>
-              <tr><td>进项税（成本）</td><td class="right" id="t_vat_in_cost">—</td><td class="right">成本×13/113</td></tr>
-              <tr><td>进项税（运费）</td><td class="right" id="t_vat_in_ship">—</td><td class="right">运费×13/113</td></tr>
-              <tr><td>进项税（平台）</td><td class="right" id="t_vat_in_platform">—</td><td class="right">平台×6/106</td></tr>
-              <tr><td>进项税（投流）</td><td class="right" id="t_vat_in_ad">—</td><td class="right">投流×6/106</td></tr>
-              <tr><td><b>应交增值税</b></td><td class="right"><b id="t_vat_pay">—</b></td><td class="right">销项−进项</td></tr>
-              <tr><td><b>税前利润</b></td><td class="right"><b id="t_profit_bt">—</b></td><td class="right">收入−成本−渠道−VAT</td></tr>
-              <tr><td>企业所得税</td><td class="right" id="t_cit">—</td><td class="right">≤300万5%/超额25%</td></tr>
-              <tr><td><b>税后净利润</b></td><td class="right"><b id="t_profit_at">—</b></td><td class="right">税前−所得税</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- 图表区 -->
+    <div class="chart-box">
+        <canvas id="profitChart"></canvas>
     </div>
 
-  </div>
+    <!-- 临界点洞察 -->
+    <div class="insight" id="insightText">
+        <h3><i class="fa fa-lightbulb"></i> 关键体量节点 & 分拆建议</h3>
+        <p>🔹 当前设定下，<strong>电商销量约 <span id="criticalPoint">-</span> 个</strong> 时，现状利润总额达300万元（所得税跳涨至25%），避税方案开始反超。（需填写电商数量）</p>
+        <p>🔹 当电商销量超过 <span id="thresholdA">-</span> 个，避税方案中A公司自身利润逼近300万，建议<strong>增设B1公司承接部分品牌授权收入</strong>，或<strong>B2公司独立承接外贸业务</strong>，将利润分流以继续享受小微优惠。</p>
+        <p>🔹 鼠标悬停在图表曲线上，会显示该销量下两个方案的净利润及针对性建议（图表以电商销量为自变量，请确保电商数量已填写）。</p>
+    </div>
+    <div class="footnote">* 所得税按小微企业5%（利润≤300万）或25%自动判断。红色数字表示该主体利润超300万，适用25%税率。所有输入框为空时按0处理。C个体户利润已完全并入B公司。修正：内销产品配件成本现使用电商采购成本。</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
-  const $ = (id)=>document.getElementById(id);
-  const STORE_KEY = "WWWAQUA_DASHBOARD_V7";
-  const MONTHS = Array.from({length:12}, (_,i)=>String(i+1).padStart(2,"0"));
+    new Vue({
+        el: '#app',
+        data: {
+            // 电商板块
+            ecom: { price: '', cost: '', qty: '' },
+            // 外贸板块
+            foreign: { priceCurrent: '', pricePlan: '', cost: '', qty: '' },
+            // 内销板块
+            domestic: { price: '', cost: '', qty: '' },
+            // 全局参数
+            params: {
+                ecomFeeRate: '',
+                royaltyRate: '',
+                processFee: '',
+                priceBtoA: '',
+                priceBtoD: '',
+                assemblyMonth: '',
+                offlineMonth: '',
+                rebateRate: '',
+                ownershipA: '',
+                operateExpenseRate: ''
+            },
+            current: {
+                A_ecom_net:0, A_ecom_vat:0, A_ecom_surcharge:0, A_ecom_tax:0, A_ecom_before:0,
+                A_foreign_net:0, A_foreign_vat:0, A_foreign_surcharge:0, A_foreign_tax:0, A_foreign_before:0,
+                A_operate_expense:0,
+                A_total_before_tax:0, A_total_tax:0, A_net:0,
+                D_net:0, D_vat:0, D_surcharge:0, D_tax:0, D_before:0,
+                total_to_A:0
+            },
+            plan: {
+                A_ecom_net:0, A_ecom_vat:0, A_ecom_surcharge:0, A_ecom_tax:0, A_ecom_before:0,
+                A_royalty_net:0, royalty_output:0, royalty_surcharge:0, royalty_tax:0, royalty_before:0,
+                A_operate_expense:0,
+                A_self_net:0,
+                B_withC_net:0, B_vat:0, B_surcharge:0, B_tax:0, B_before:0, C_net:0,
+                fromB_to_A:0,
+                D_net:0, D_vat:0, D_surcharge:0, D_tax:0, D_before:0,
+                total_to_A:0
+            },
+            chart: null
+        },
+        mounted() {
+            this.recalcAll();
+            this.initChart();
+        },
+        methods: {
+            toNumber(val) {
+                const num = parseFloat(val);
+                return isNaN(num) ? 0 : num;
+            },
+            formatMoney(val) {
+                if (isNaN(val) || val === 0) return '¥0.00万';
+                return '¥' + (val / 10000).toFixed(2) + '万';
+            },
+            formatPercent(val) {
+                const num = this.toNumber(val);
+                return num ? num + '%' : '0%';
+            },
+            taxCalc(profit) {
+                return profit > 3000000 ? profit * 0.25 : profit * 0.05;
+            },
+            // 现状计算
+            calcCurrent() {
+                const e = {
+                    price: this.toNumber(this.ecom.price),
+                    cost: this.toNumber(this.ecom.cost),
+                    qty: this.toNumber(this.ecom.qty)
+                };
+                const f = {
+                    priceCurrent: this.toNumber(this.foreign.priceCurrent),
+                    cost: this.toNumber(this.foreign.cost),
+                    qty: this.toNumber(this.foreign.qty)
+                };
+                const d = {
+                    price: this.toNumber(this.domestic.price),
+                    cost: this.toNumber(this.domestic.cost),
+                    qty: this.toNumber(this.domestic.qty)
+                };
+                const p = {
+                    ecomFeeRate: this.toNumber(this.params.ecomFeeRate),
+                    royaltyRate: this.toNumber(this.params.royaltyRate),
+                    processFee: this.toNumber(this.params.processFee),
+                    priceBtoA: this.toNumber(this.params.priceBtoA),
+                    priceBtoD: this.toNumber(this.params.priceBtoD),
+                    assemblyMonth: this.toNumber(this.params.assemblyMonth),
+                    offlineMonth: this.toNumber(this.params.offlineMonth),
+                    rebateRate: this.toNumber(this.params.rebateRate),
+                    ownershipA: this.toNumber(this.params.ownershipA),
+                    operateExpenseRate: this.toNumber(this.params.operateExpenseRate)
+                };
 
-  // Defaults (fixed rules)
-  const FEE_CAP = 0.28;
-  const DEF_PLATFORM_RATE = 10;
-  const DEF_SHIP_RATE = 5;
-  const DEF_UNIT_PRICE = 600;
-  const DEF_UNIT_COST  = 200;
+                // 电商
+                const ecomRevInc = e.price * e.qty;
+                const ecomCostInc = e.cost * e.qty;
+                const ecomFeeInc = ecomRevInc * p.ecomFeeRate / 100;
 
-  const VAT13 = 0.13;
-  const VAT6  = 0.06;
-  const CIT_THRESHOLD = 3000000;
-  const CIT_LOW = 0.05;
-  const CIT_HIGH = 0.25;
+                const ecomRev = ecomRevInc / 1.13;
+                const ecomCost = ecomCostInc / 1.13;
+                const ecomFee = ecomFeeInc / 1.06;
+                const ecomVAT = ecomRev*0.13 - ecomCost*0.13 - ecomFee*0.06;
+                const ecomSurcharge = ecomVAT * 0.12;
+                const ecomProfitBefore = ecomRev - ecomCost - ecomFee - ecomSurcharge;
 
-  function num(v){ const x = parseFloat(v); return isNaN(x) ? 0 : x; }
-  function fmtMoney(n){
-    if(!isFinite(n)) return "—";
-    return n.toLocaleString("zh-CN",{minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-  function fmtPct(n){
-    if(!isFinite(n)) return "—";
-    return (n*100).toFixed(2) + "%";
-  }
+                // 外贸
+                const foreignRevInc = f.priceCurrent * f.qty;
+                const foreignCostInc = f.cost * f.qty;
+                const foreignRev = foreignRevInc / 1.13;
+                const foreignCost = foreignCostInc / 1.13;
+                const foreignVAT = foreignRev*0.13 - foreignCost*0.13;
+                const foreignSurcharge = foreignVAT * 0.12;
+                const foreignProfitBefore = foreignRev - foreignCost - foreignSurcharge;
 
-  const emptyMonth = ()=>({
-    netPay: 0,
-    adSpend: 0,
-    platformRate: DEF_PLATFORM_RATE,
-    shipRate: DEF_SHIP_RATE,
-    platformFeeActual: 0,
-    shipFeeActual: 0,
-    useActualFees: false,
-    unitPrice: DEF_UNIT_PRICE,
-    unitCost: DEF_UNIT_COST,
-  });
+                // A公司总收入不含税
+                const A_total_revenue = ecomRev + foreignRev;
+                const operateExpense = A_total_revenue * p.operateExpenseRate / 100;
 
-  let state = {
-    view: "month",
-    month: "01",
-    months: Object.fromEntries(MONTHS.map(m=>[m, emptyMonth()])),
-  };
+                const A_total_before = ecomProfitBefore + foreignProfitBefore - operateExpense;
+                const A_total_tax = this.taxCalc(A_total_before);
+                const A_net = A_total_before - A_total_tax;
 
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORE_KEY);
-      if(!raw) return;
-      const obj = JSON.parse(raw);
-      state.view = obj.view || state.view;
-      state.month = obj.month || state.month;
-      if(obj.months){
-        for(const m of MONTHS){
-          state.months[m] = {...emptyMonth(), ...(obj.months[m]||{})};
+                // D公司
+                const D_revInc = d.price * d.qty;
+                const D_costInc = d.cost * d.qty;
+                const D_rev = D_revInc / 1.03;
+                const D_vat = D_rev * 0.03;
+                const D_surcharge = D_vat * 0.12;
+                const D_annualOffline = p.offlineMonth * 12;
+                const D_profitBefore = D_rev - D_costInc - D_surcharge - D_annualOffline;
+                const D_tax = this.taxCalc(D_profitBefore);
+                const D_net = D_profitBefore - D_tax;
+
+                this.current = {
+                    A_ecom_net: ecomProfitBefore - this.taxCalc(ecomProfitBefore),
+                    A_ecom_vat: ecomVAT,
+                    A_ecom_surcharge: ecomSurcharge,
+                    A_ecom_tax: this.taxCalc(ecomProfitBefore),
+                    A_ecom_before: ecomProfitBefore,
+                    A_foreign_net: foreignProfitBefore - this.taxCalc(foreignProfitBefore),
+                    A_foreign_vat: foreignVAT,
+                    A_foreign_surcharge: foreignSurcharge,
+                    A_foreign_tax: this.taxCalc(foreignProfitBefore),
+                    A_foreign_before: foreignProfitBefore,
+                    A_operate_expense: operateExpense,
+                    A_total_before_tax: A_total_before,
+                    A_total_tax: A_total_tax,
+                    A_net: A_net,
+                    D_net: D_net,
+                    D_vat: D_vat,
+                    D_surcharge: D_surcharge,
+                    D_tax: D_tax,
+                    D_before: D_profitBefore,
+                    total_to_A: A_net + D_net
+                };
+            },
+            // 避税方案计算（修正内销配件成本）
+            calcPlan() {
+                const e = {
+                    price: this.toNumber(this.ecom.price),
+                    cost: this.toNumber(this.ecom.cost),
+                    qty: this.toNumber(this.ecom.qty)
+                };
+                const f = {
+                    pricePlan: this.toNumber(this.foreign.pricePlan),
+                    cost: this.toNumber(this.foreign.cost),
+                    qty: this.toNumber(this.foreign.qty)
+                };
+                const d = {
+                    price: this.toNumber(this.domestic.price),
+                    qty: this.toNumber(this.domestic.qty)
+                };
+                const p = {
+                    ecomFeeRate: this.toNumber(this.params.ecomFeeRate),
+                    royaltyRate: this.toNumber(this.params.royaltyRate),
+                    processFee: this.toNumber(this.params.processFee),
+                    priceBtoA: this.toNumber(this.params.priceBtoA),
+                    priceBtoD: this.toNumber(this.params.priceBtoD),
+                    assemblyMonth: this.toNumber(this.params.assemblyMonth),
+                    offlineMonth: this.toNumber(this.params.offlineMonth),
+                    rebateRate: this.toNumber(this.params.rebateRate),
+                    ownershipA: this.toNumber(this.params.ownershipA),
+                    operateExpenseRate: this.toNumber(this.params.operateExpenseRate)
+                };
+
+                const totalQty = e.qty + f.qty + d.qty;
+
+                // C个体户
+                const processFeeInc = totalQty * p.processFee;
+                const C_rev = processFeeInc / 1.01;
+                const C_vat = C_rev * 0.01;
+                const C_surcharge = C_vat * 0.12;
+                const C_incomeTax = C_rev * 0.005;
+                const C_net = C_rev - C_surcharge - C_incomeTax;
+
+                // B公司
+                const B_toA_revInc = e.qty * p.priceBtoA;
+                const B_toA_rev = B_toA_revInc / 1.13;
+                const B_toA_output = B_toA_rev * 0.13;
+
+                const B_foreign_rev = f.qty * f.pricePlan;
+                const B_foreign_costInc = f.qty * f.cost;
+                const B_foreign_costNet = B_foreign_costInc / 1.13;
+                const B_foreign_input = B_foreign_costNet * 0.13;
+                const B_foreign_rebate = B_foreign_input * (p.rebateRate / 13);
+                const B_foreign_actualCost = B_foreign_costNet - B_foreign_rebate;
+
+                const B_toD_revInc = d.qty * p.priceBtoD;
+                const B_toD_rev = B_toD_revInc / 1.13;
+                const B_toD_output = B_toD_rev * 0.13;
+
+                // 修正：内销产品的配件成本使用电商成本 e.cost
+                const B_partsInc = (e.qty * e.cost) + (f.qty * f.cost) + (d.qty * e.cost);
+                const B_partsNet = B_partsInc / 1.13;
+                const B_partsInput = B_partsNet * 0.13;
+
+                const B_input_C = C_vat;
+
+                const B_output = B_toA_output + B_toD_output;
+                const B_vat = Math.max(0, B_output - B_partsInput - B_input_C);
+                const B_surcharge = B_vat * 0.12;
+
+                const B_revenue = B_toA_rev + B_foreign_rev + B_toD_rev;
+
+                // 修正内销配件成本
+                const B_partsNet_normal = (e.qty * e.cost / 1.13) + (d.qty * e.cost / 1.13);
+                const B_foreign_adj = B_foreign_costNet - B_foreign_rebate;
+                const B_totalPartsNet = B_partsNet_normal + B_foreign_adj;
+                const B_processCost = C_rev;
+                const B_annualAssembly = p.assemblyMonth * 12;
+
+                const B_profitBeforeTax = B_revenue - B_totalPartsNet - B_processCost - B_annualAssembly - B_surcharge;
+                const B_tax = this.taxCalc(B_profitBeforeTax);
+                const B_net = B_profitBeforeTax - B_tax;
+                const B_withC_net = B_net + C_net;
+
+                // A公司
+                const A_ecomRevInc = e.price * e.qty;
+                const A_ecomRev = A_ecomRevInc / 1.13;
+                const A_ecom_output = A_ecomRev * 0.13;
+                const A_ecomPurchaseInc = e.qty * p.priceBtoA;
+                const A_ecomPurchaseNet = A_ecomPurchaseInc / 1.13;
+                const A_ecom_input = A_ecomPurchaseNet * 0.13;
+                const A_ecomFeeInc = A_ecomRevInc * p.ecomFeeRate / 100;
+                const A_ecomFee = A_ecomFeeInc / 1.06;
+                const A_ecomFeeInput = A_ecomFee * 0.06;
+                const A_ecomVAT = A_ecom_output - A_ecom_input - A_ecomFeeInput;
+                const A_ecomSurcharge = A_ecomVAT * 0.12;
+                const A_ecomProfitBefore = A_ecomRev - A_ecomPurchaseNet - A_ecomFee - A_ecomSurcharge;
+                const A_ecomTax = this.taxCalc(A_ecomProfitBefore);
+                const A_ecomNet = A_ecomProfitBefore - A_ecomTax;
+
+                // 授权费
+                const royaltyInc = B_revenue * p.royaltyRate / 100;
+                const royaltyNet = royaltyInc / 1.06;
+                const royaltyOutput = royaltyNet * 0.06;
+                const royaltySurcharge = royaltyOutput * 0.12;
+                const royaltyProfitBefore = royaltyNet - royaltySurcharge;
+                const royaltyTax = this.taxCalc(royaltyProfitBefore);
+                const royaltyNetProfit = royaltyProfitBefore - royaltyTax;
+
+                // A公司总收入不含税
+                const A_total_revenue = A_ecomRev + royaltyNet;
+                const operateExpense = A_total_revenue * p.operateExpenseRate / 100;
+
+                const A_self_before = A_ecomProfitBefore + royaltyProfitBefore - operateExpense;
+                const A_self_tax = this.taxCalc(A_self_before);
+                const A_self_net = A_self_before - A_self_tax;
+
+                // D公司
+                const D_revInc = d.price * d.qty;
+                const D_costInc = d.qty * p.priceBtoD;
+                const D_rev = D_revInc / 1.03;
+                const D_vat = D_rev * 0.03;
+                const D_surcharge = D_vat * 0.12;
+                const D_annualOffline = p.offlineMonth * 12;
+                const D_profitBefore = D_rev - D_costInc - D_surcharge - D_annualOffline;
+                const D_tax = this.taxCalc(D_profitBefore);
+                const D_net = D_profitBefore - D_tax;
+
+                const fromB_to_A = B_withC_net * (p.ownershipA / 100);
+                const total_to_A = A_self_net + fromB_to_A + D_net;
+
+                this.plan = {
+                    A_ecom_net: A_ecomNet,
+                    A_ecom_vat: A_ecomVAT,
+                    A_ecom_surcharge: A_ecomSurcharge,
+                    A_ecom_tax: A_ecomTax,
+                    A_ecom_before: A_ecomProfitBefore,
+                    A_royalty_net: royaltyNetProfit,
+                    royalty_output: royaltyOutput,
+                    royalty_surcharge: royaltySurcharge,
+                    royalty_tax: royaltyTax,
+                    royalty_before: royaltyProfitBefore,
+                    A_operate_expense: operateExpense,
+                    A_self_net: A_self_net,
+                    B_withC_net: B_withC_net,
+                    B_vat: B_vat,
+                    B_surcharge: B_surcharge,
+                    B_tax: B_tax,
+                    B_before: B_profitBeforeTax,
+                    C_net: C_net,
+                    fromB_to_A: fromB_to_A,
+                    D_net: D_net,
+                    D_vat: D_vat,
+                    D_surcharge: D_surcharge,
+                    D_tax: D_tax,
+                    D_before: D_profitBefore,
+                    total_to_A: total_to_A
+                };
+            },
+            recalcAll() {
+                this.calcCurrent();
+                this.calcPlan();
+            },
+            initChart() {
+                const ctx = document.getElementById('profitChart').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: [], datasets: [] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.dataset.label}: ¥${(ctx.raw/10000).toFixed(2)}万`,
+                                    afterBody: (context) => {
+                                        if (!context.length) return [];
+                                        let idx = context[0].dataIndex;
+                                        let q = 5000 + idx * 1000;
+                                        let lines = [];
+                                        if (q >= 16000 && q < 18000) lines.push('🔸 现状利润超300万，税负跳涨，避税优势显现');
+                                        if (q >= 20000) lines.push('🔹 A自身利润近300万，可考虑设B1/B2分流');
+                                        return lines;
+                                    }
+                                }
+                            },
+                            legend: { position: 'top' }
+                        },
+                        scales: { y: { ticks: { callback: (v) => '¥' + (v/10000).toFixed(1) + '万' } } }
+                    }
+                });
+                this.updateChart();
+            },
+            updateChart() {
+                this.recalcAll();
+                const originalQty = this.toNumber(this.ecom.qty);
+                const labels = [];
+                const currentData = [];
+                const planData = [];
+                for (let q = 5000; q <= 40000; q += 1000) {
+                    this.ecom.qty = q;
+                    this.calcCurrent();
+                    this.calcPlan();
+                    labels.push((q/1000).toFixed(0) + 'k');
+                    currentData.push(this.current.total_to_A);
+                    planData.push(this.plan.total_to_A);
+                }
+                this.ecom.qty = originalQty;
+                this.recalcAll();
+
+                if (this.chart) {
+                    this.chart.data.labels = labels;
+                    this.chart.data.datasets = [
+                        { label: '现状归属A净利润', data: currentData, borderColor: '#1f6194', backgroundColor: 'transparent', tension: 0.2, pointRadius: 3 },
+                        { label: '避税方案归属A净利润', data: planData, borderColor: '#b13e3e', backgroundColor: 'transparent', tension: 0.2, pointRadius: 3 }
+                    ];
+                    this.chart.update();
+                }
+
+                let criticalQ = 0;
+                for (let q = 5000; q <= 40000; q+=500) {
+                    this.ecom.qty = q;
+                    this.calcCurrent();
+                    if (this.current.A_total_before_tax >= 3000000) { criticalQ = q; break; }
+                }
+                document.getElementById('criticalPoint').innerText = criticalQ ? criticalQ.toLocaleString() : '—';
+                let thresholdQ = 0;
+                for (let q = 5000; q <= 50000; q+=1000) {
+                    this.ecom.qty = q;
+                    this.calcPlan();
+                    if (this.plan.A_self_net + this.plan.fromB_to_A > 3000000) { thresholdQ = q; break; }
+                }
+                document.getElementById('thresholdA').innerText = thresholdQ ? thresholdQ.toLocaleString() : '—';
+                this.ecom.qty = originalQty;
+                this.recalcAll();
+            }
+        },
+        watch: {
+            // 手动点击更新，不自动
         }
-      }
-    }catch(e){}
-  }
-  function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
-
-  function buildMonthOptions(){
-    const sel = $("monthSel");
-    sel.innerHTML = "";
-    for(const m of MONTHS){
-      const opt = document.createElement("option");
-      opt.value = m;
-      opt.textContent = m + "月";
-      sel.appendChild(opt);
-    }
-    sel.value = state.month;
-    $("monthName").textContent = state.month + "月";
-  }
-
-  function setView(v){
-    state.view = v;
-    saveState();
-    $("btnMonth").classList.toggle("active", v==="month");
-    $("btnYear").classList.toggle("active", v==="year");
-    $("viewName").textContent = v==="month" ? "当月" : "全年汇总";
-  }
-  window.setView = setView;
-
-  function onMonthChange(){
-    state.month = $("monthSel").value;
-    saveState();
-    $("monthName").textContent = state.month + "月";
-    renderInputs();
-    applyFeeModeUI();
-  }
-  window.onMonthChange = onMonthChange;
-
-  function applyFeeModeUI(){
-    const d = state.months[state.month];
-    const useActual = !!d.useActualFees;
-
-    $("useActualFees").checked = useActual;
-    $("modeText").textContent = useActual ? "实际（手动填金额）" : "自动（按费率计算）";
-
-    // If auto mode: lock fee amount inputs (readonly feel), but still show value after calculate
-    $("platformFee").readOnly = !useActual;
-    $("shipFee").readOnly = !useActual;
-
-    $("platformHint").textContent = useActual ? "手动填：平台费金额" : "自动=净支付×费率";
-    $("shipHint").textContent = useActual ? "手动填：运费金额" : "自动=净支付×费率";
-
-    // Visual cue
-    $("platformFee").style.opacity = useActual ? "1" : "0.85";
-    $("shipFee").style.opacity = useActual ? "1" : "0.85";
-  }
-
-  function renderInputs(){
-    const d = state.months[state.month];
-
-    $("netPay").value = d.netPay ? d.netPay : "";
-    $("adSpend").value = d.adSpend ? d.adSpend : "";
-
-    $("platformRate").value = (d.platformRate ?? DEF_PLATFORM_RATE);
-    $("shipRate").value = (d.shipRate ?? DEF_SHIP_RATE);
-
-    $("unitPrice").value = (d.unitPrice ?? DEF_UNIT_PRICE);
-    $("unitCost").value = (d.unitCost ?? DEF_UNIT_COST);
-
-    // For fee amount boxes, show actual stored if in actual mode, else keep blank until calculate
-    if(d.useActualFees){
-      $("platformFee").value = d.platformFeeActual ? d.platformFeeActual : "";
-      $("shipFee").value = d.shipFeeActual ? d.shipFeeActual : "";
-    }else{
-      $("platformFee").value = "";
-      $("shipFee").value = "";
-    }
-
-    $("useActualFees").checked = !!d.useActualFees;
-    $("modeText").textContent = d.useActualFees ? "实际（手动填金额）" : "自动（按费率计算）";
-  }
-
-  function bindInputs(){
-    // basic
-    ["netPay","adSpend","platformRate","shipRate","unitPrice","unitCost"].forEach(id=>{
-      $(id).addEventListener("input", ()=>{
-        const d = state.months[state.month];
-        d[id] = num($(id).value);
-        saveState();
-      });
     });
-
-    // fee amount (actual)
-    $("platformFee").addEventListener("input", ()=>{
-      const d = state.months[state.month];
-      d.platformFeeActual = num($("platformFee").value);
-      saveState();
-    });
-    $("shipFee").addEventListener("input", ()=>{
-      const d = state.months[state.month];
-      d.shipFeeActual = num($("shipFee").value);
-      saveState();
-    });
-
-    // mode toggle
-    $("useActualFees").addEventListener("change", ()=>{
-      const d = state.months[state.month];
-      d.useActualFees = $("useActualFees").checked;
-      saveState();
-      applyFeeModeUI();
-      // In auto mode, clear amount fields to reduce confusion until calculate
-      if(!d.useActualFees){
-        $("platformFee").value = "";
-        $("shipFee").value = "";
-      }else{
-        $("platformFee").value = d.platformFeeActual ? d.platformFeeActual : "";
-        $("shipFee").value = d.shipFeeActual ? d.shipFeeActual : "";
-      }
-    });
-  }
-
-  function copyPrevMonth(){
-    const idx = MONTHS.indexOf(state.month);
-    if(idx<=0){ alert("已经是01月，没有上月可复制"); return; }
-    const prev = MONTHS[idx-1];
-    state.months[state.month] = {...state.months[prev]};
-    saveState();
-    renderInputs();
-    applyFeeModeUI();
-  }
-  window.copyPrevMonth = copyPrevMonth;
-
-  function clearMonth(){
-    if(!confirm("确认清空本月数据？")) return;
-    state.months[state.month] = emptyMonth();
-    saveState();
-    renderInputs();
-    applyFeeModeUI();
-  }
-  window.clearMonth = clearMonth;
-
-  function sumYear(){
-    const out = emptyMonth();
-    out.netPay = 0;
-    out.adSpend = 0;
-    out.platformFeeActual = 0;
-    out.shipFeeActual = 0;
-
-    for(const m of MONTHS){
-      const d = state.months[m];
-      out.netPay += num(d.netPay);
-      out.adSpend += num(d.adSpend);
-
-      // If month uses actual fees, add them; else auto-calc at month level and add
-      const pr = (num(d.platformRate) || DEF_PLATFORM_RATE) / 100;
-      const sr = (num(d.shipRate) || DEF_SHIP_RATE) / 100;
-
-      if(d.useActualFees){
-        out.platformFeeActual += num(d.platformFeeActual);
-        out.shipFeeActual += num(d.shipFeeActual);
-      }else{
-        out.platformFeeActual += num(d.netPay) * pr;
-        out.shipFeeActual += num(d.netPay) * sr;
-      }
-    }
-
-    // Year view: fees are treated as "actual totals" (avoid re-calculating on total netPay)
-    out.useActualFees = true;
-    out.platformRate = num($("platformRate").value) || DEF_PLATFORM_RATE;
-    out.shipRate = num($("shipRate").value) || DEF_SHIP_RATE;
-
-    // For annual cost model, take the current assumed unit price/cost in the input boxes
-    out.unitPrice = num($("unitPrice").value) || DEF_UNIT_PRICE;
-    out.unitCost = num($("unitCost").value) || DEF_UNIT_COST;
-
-    return out;
-  }
-
-  function calculate(){
-    const data = (state.view === "year") ? sumYear() : state.months[state.month];
-    const netPay = num(data.netPay);
-    const adSpend = num(data.adSpend);
-
-    const platformRate = (num(data.platformRate) || DEF_PLATFORM_RATE) / 100;
-    const shipRate = (num(data.shipRate) || DEF_SHIP_RATE) / 100;
-
-    const unitPrice = num(data.unitPrice) || DEF_UNIT_PRICE;
-    const unitCost  = num(data.unitCost)  || DEF_UNIT_COST;
-
-    // Platform & shipping fees: auto or actual
-    let platformFee = 0, shipFee = 0;
-
-    if(data.useActualFees){
-      platformFee = num(data.platformFeeActual);
-      shipFee = num(data.shipFeeActual);
-    }else{
-      platformFee = netPay * platformRate;
-      shipFee = netPay * shipRate;
-    }
-
-    // Reflect on UI
-    $("platformFee").value = isFinite(platformFee) ? platformFee.toFixed(2) : "";
-    $("shipFee").value = isFinite(shipFee) ? shipFee.toFixed(2) : "";
-
-    // If month view and actual mode, persist latest typed values (in case user only typed, not blur)
-    if(state.view === "month"){
-      const d = state.months[state.month];
-      if(d.useActualFees){
-        d.platformFeeActual = platformFee;
-        d.shipFeeActual = shipFee;
-        saveState();
-      }
-    }
-
-    // Fee ratio
-    const channelCost = adSpend + platformFee + shipFee;
-    const feeRatio = netPay > 0 ? channelCost / netPay : NaN;
-    const feeRoom = netPay > 0 ? (FEE_CAP - feeRatio) * netPay : NaN;
-
-    // Ad cap
-    const maxChannelCost = netPay * FEE_CAP;
-    const addAdCap = maxChannelCost - channelCost;
-
-    // Sales = netPay
-    const sales = netPay;
-
-    // Qty & cost total
-    const qty = (unitPrice > 0) ? (sales / unitPrice) : 0;
-    const costTotal = qty * unitCost;
-
-    // VAT (full credits)
-    const vatOut = sales * (VAT13 / (1 + VAT13));
-    const vatInCost = costTotal * (VAT13 / (1 + VAT13));
-    const vatInShip = shipFee * (VAT13 / (1 + VAT13));
-    const vatInPlatform = platformFee * (VAT6 / (1 + VAT6));
-    const vatInAd = adSpend * (VAT6 / (1 + VAT6));
-    const vatPay = vatOut - (vatInCost + vatInShip + vatInPlatform + vatInAd);
-
-    // Profit
-    const profitBT = sales - costTotal - channelCost - vatPay;
-
-    let cit = 0;
-    if(profitBT <= 0) cit = 0;
-    else if(profitBT <= CIT_THRESHOLD) cit = profitBT * CIT_LOW;
-    else cit = CIT_THRESHOLD * CIT_LOW + (profitBT - CIT_THRESHOLD) * CIT_HIGH;
-
-    const profitAT = profitBT - cit;
-
-    // KPI render
-    $("feeRatio").textContent = fmtPct(feeRatio);
-    $("channelCost").textContent = fmtMoney(channelCost);
-    $("netPayShow").textContent = fmtMoney(netPay);
-
-    $("feeRoom").textContent = isFinite(feeRoom)
-      ? (feeRoom >= 0 ? ("+"+fmtMoney(feeRoom)) : ("-"+fmtMoney(Math.abs(feeRoom))))
-      : "—";
-
-    $("addAdCap").textContent = isFinite(addAdCap)
-      ? (addAdCap >= 0 ? ("+" + fmtMoney(addAdCap)) : ("需减少 " + fmtMoney(Math.abs(addAdCap))))
-      : "—";
-
-    $("vatPay").textContent = fmtMoney(vatPay);
-    $("profitBT").textContent = fmtMoney(profitBT);
-    $("profitAT").textContent = fmtMoney(profitAT);
-    $("citShow").textContent = fmtMoney(cit);
-
-    // meter
-    const denom = FEE_CAP * 1.6;
-    const w = isFinite(feeRatio) ? Math.max(0, Math.min(1, feeRatio/denom)) : 0;
-    $("feeBar").style.width = (w*100).toFixed(1) + "%";
-
-    // badge & warning
-    const badge = $("feeBadge");
-    const warnBox = $("warnBox");
-    badge.classList.remove("good","warn","bad");
-    warnBox.classList.remove("show");
-    warnBox.textContent = "";
-
-    let statusText = "—";
-    if(isFinite(feeRatio)){
-      if(feeRatio <= FEE_CAP){
-        const near = feeRatio >= FEE_CAP - 0.01;
-        if(near){
-          badge.classList.add("warn");
-          statusText = "接近红线";
-          warnBox.classList.add("show");
-          warnBox.textContent = `费比接近红线：当前 ${fmtPct(feeRatio)}，红线 28.00%。建议：先压投流/运费补贴/平台成本，或提升净支付。`;
-        }else{
-          badge.classList.add("good");
-          statusText = "合规（PASS）";
-        }
-      }else{
-        badge.classList.add("bad");
-        statusText = "超红线（FAIL）";
-        warnBox.classList.add("show");
-        warnBox.textContent = `费比超红线：当前 ${fmtPct(feeRatio)}，红线 28.00%。需要减少投流或提升净支付。`;
-      }
-    }
-    $("feeStatusText").textContent = statusText;
-
-    // table
-    $("t_fee").textContent = fmtPct(feeRatio);
-    $("t_channel").textContent = fmtMoney(channelCost);
-    $("t_qty").textContent = isFinite(qty) ? qty.toFixed(2) : "—";
-    $("t_cost_total").textContent = fmtMoney(costTotal);
-
-    $("t_vat_out").textContent = fmtMoney(vatOut);
-    $("t_vat_in_cost").textContent = fmtMoney(vatInCost);
-    $("t_vat_in_ship").textContent = fmtMoney(vatInShip);
-    $("t_vat_in_platform").textContent = fmtMoney(vatInPlatform);
-    $("t_vat_in_ad").textContent = fmtMoney(vatInAd);
-    $("t_vat_pay").textContent = fmtMoney(vatPay);
-
-    $("t_profit_bt").textContent = fmtMoney(profitBT);
-    $("t_cit").textContent = fmtMoney(cit);
-    $("t_profit_at").textContent = fmtMoney(profitAT);
-
-    $("viewName").textContent = state.view === "month" ? "当月" : "全年汇总";
-    $("monthName").textContent = state.month + "月";
-  }
-  window.calculate = calculate;
-
-  // init
-  loadState();
-  buildMonthOptions();
-  bindInputs();
-  renderInputs();
-  applyFeeModeUI();
-  setView(state.view);
 </script>
 </body>
 </html>
