@@ -2,174 +2,355 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>税务方案对比 · 修正内销配件成本</title>
-    <!-- Chart.js & Font Awesome -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>税务方案对比 · 手机版</title>
+    <!-- Chart.js 轻量图表 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; }
-        body { background: #eef3f9; padding: 24px; display: flex; justify-content: center; }
-        .container { max-width: 1500px; width: 100%; background: white; border-radius: 40px; box-shadow: 0 30px 60px -15px #1b3f60; padding: 36px; }
-        h1 { font-size: 2.4rem; font-weight: 700; color: #0b2e4a; display: flex; align-items: center; gap: 12px; }
-        .badge { background: #1d6fb0; color: white; padding: 4px 18px; border-radius: 60px; font-size: 1.1rem; margin-left: 16px; }
-        .sub { background: #e1effb; border-left: 8px solid #1d6fb0; padding: 18px 28px; border-radius: 50px; margin: 20px 0 30px; color: #154a73; font-weight: 500; }
-        .input-panel { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-bottom: 30px; }
-        .card { background: #f9fcff; border-radius: 32px; padding: 26px; border: 1px solid #d1e2f5; box-shadow: 0 6px 14px rgba(0,40,70,0.04); }
-        .card h3 { color: #1b4f7a; margin-bottom: 20px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .input-row label { font-weight: 600; color: #1e4b73; width: 150px; }
-        .input-row input { width: 150px; padding: 10px 16px; border: 1px solid #b9d2ec; border-radius: 40px; font-size: 1rem; text-align: right; background: white; }
-        .param-bar { background: #e5f0fd; border-radius: 60px; padding: 22px 36px; margin: 30px 0; display: flex; flex-wrap: wrap; gap: 30px; align-items: center; }
-        .param-item { display: flex; align-items: center; gap: 10px; }
-        .param-item label { font-weight: 600; color: #124571; min-width: 140px; }
-        .param-item input { width: 100px; padding: 8px 12px; border-radius: 40px; border: 1px solid #aac3df; text-align: right; }
-        .param-item .wide { width: 130px; }
-        button { background: #0f4c81; border: none; color: white; font-weight: 700; padding: 16px 44px; border-radius: 60px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 8px 20px #0f4c8140; transition: 0.2s; margin-bottom: 10px; }
-        button:hover { background: #0a3760; transform: translateY(-3px); }
-        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin: 40px 0; }
-        .result-box { background: #ffffff; border-radius: 36px; padding: 30px; box-shadow: 0 15px 30px #d0e0f0; border: 1px solid #c0d6f0; }
-        .result-box h2 { font-size: 1.9rem; border-bottom: 3px solid #aac6e8; padding-bottom: 16px; margin-bottom: 24px; color: #0b3e64; }
-        .detail-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #b8d2ed; font-size: 1rem; }
-        .total { font-size: 1.6rem; font-weight: 700; color: #004b87; margin-top: 18px; padding-top: 18px; border-top: 3px solid #004b87; }
-        .red-text { color: #c0392b !important; font-weight: 700; }
-        .chart-box { background: #ffffff; border-radius: 36px; padding: 30px; margin: 30px 0; border: 1px solid #c0d6f0; }
-        canvas { width: 100%; height: 400px; }
-        .insight { background: #fef8e7; border-left: 8px solid #f3b34c; border-radius: 32px; padding: 28px; margin-top: 28px; }
-        .insight h3 { color: #a55d0a; font-size: 1.6rem; margin-bottom: 16px; }
-        .footnote { color: #4d6f91; text-align: center; margin-top: 36px; font-size: 0.95rem; }
-        .warning-icon { color: #e67e22; margin-left: 6px; }
-        input::placeholder { color: #b0c4de; font-style: italic; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #f0f5fa;
+            padding: 12px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 15px 40px rgba(0, 30, 60, 0.1);
+            padding: 20px 18px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0a2e4a;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: #1d6fb0;
+            color: white;
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-weight: 500;
+        }
+        .sub {
+            background: #e4f0fd;
+            border-left: 5px solid #1d6fb0;
+            padding: 12px 16px;
+            border-radius: 24px;
+            margin: 16px 0 20px;
+            font-size: 0.9rem;
+            color: #124e7a;
+            line-height: 1.5;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #124e7a;
+            margin: 20px 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #cfe0f0;
+        }
+        .card {
+            background: #f9fcff;
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #dae9f5;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            gap: 8px;
+        }
+        .input-row label {
+            font-weight: 600;
+            color: #1e4e72;
+            font-size: 0.95rem;
+            flex: 0 0 120px;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #bdd6ec;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            background: white;
+            text-align: right;
+            min-width: 0;
+        }
+        .input-row input:focus {
+            border-color: #1d6fb0;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(29,111,176,0.15);
+        }
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            background: #ecf5fd;
+            border-radius: 28px;
+            padding: 18px;
+            margin: 12px 0 16px;
+        }
+        .param-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .param-item label {
+            font-weight: 600;
+            color: #103f61;
+            font-size: 0.8rem;
+        }
+        .param-item input {
+            padding: 10px 10px;
+            border: 1px solid #b0cde7;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            background: white;
+            width: 100%;
+            text-align: right;
+        }
+        button {
+            background: #0f4c81;
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 16px 24px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 12px 0 18px;
+            box-shadow: 0 8px 20px rgba(15,76,129,0.3);
+            letter-spacing: 0.5px;
+        }
+        button:hover {
+            background: #0a3760;
+        }
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .result-card {
+            background: white;
+            border-radius: 28px;
+            padding: 18px;
+            border: 1px solid #c6dcf2;
+            box-shadow: 0 6px 14px rgba(0,30,60,0.05);
+        }
+        .result-card h2 {
+            font-size: 1.4rem;
+            color: #0f3d60;
+            border-bottom: 2px solid #b8d4f0;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #c6d9f0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .detail-line.sub {
+            margin-left: 12px;
+            font-size: 0.85rem;
+            color: #3a6186;
+            background: transparent;
+            border-left: none;
+            padding: 4px 0;
+        }
+        .total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #004b87;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 3px solid #004b87;
+        }
+        .red-text {
+            color: #c0392b !important;
+            font-weight: 700;
+        }
+        .warning-icon {
+            color: #e67e22;
+            margin-left: 4px;
+            font-size: 0.9rem;
+        }
+        .chart-box {
+            background: white;
+            border-radius: 28px;
+            padding: 18px;
+            margin: 20px 0;
+            border: 1px solid #c6dcf2;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            max-height: 280px;
+        }
+        .insight {
+            background: #fef8e7;
+            border-left: 6px solid #f3b34c;
+            border-radius: 24px;
+            padding: 18px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+        .insight h3 {
+            color: #a55d0a;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .footnote {
+            color: #4f7092;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 22px;
+            padding-top: 14px;
+            border-top: 1px dashed #c6dcf2;
+        }
+        .inline-icon {
+            margin-right: 4px;
+        }
+        /* 小屏幕优化 */
+        @media (max-width: 400px) {
+            .input-row label {
+                flex-basis: 100px;
+                font-size: 0.85rem;
+            }
+            .param-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-<div id="app" class="container">
-    <h1><i class="fa fa-calculator"></i> 税务方案对比 <span class="badge">内销配件成本已修正</span></h1>
-    <div class="sub"><i class="fa fa-info-circle"></i> 所有数值请自行填写（留空或无效输入按0处理）。点击按钮更新结果和图表。</div>
+<div class="container" id="app">
+    <h1>📊 税负对比 <span class="badge">手机版</span></h1>
+    <div class="sub">⚡ 现状 vs 避税 (A占B%) · 自行填写所有参数 · 点击更新</div>
 
-    <!-- 三大板块输入 -->
-    <div class="input-panel">
-        <div class="card">
-            <h3><i class="fa fa-shopping-cart"></i> 电商板块 (NA)</h3>
-            <div class="input-row"><label>售价(含13%):</label><input type="number" v-model.number="ecom.price" placeholder=""></div>
-            <div class="input-row"><label>采购成本(含13%):</label><input type="number" v-model.number="ecom.cost" placeholder=""></div>
-            <div class="input-row"><label>销售数量:</label><input type="number" v-model.number="ecom.qty" placeholder=""></div>
-        </div>
-        <div class="card">
-            <h3><i class="fa fa-globe"></i> 外贸板块 (NA)</h3>
-            <div class="input-row"><label>现状售价(含13%):</label><input type="number" v-model.number="foreign.priceCurrent" placeholder=""></div>
-            <div class="input-row"><label>避税售价(免税价):</label><input type="number" v-model.number="foreign.pricePlan" placeholder=""></div>
-            <div class="input-row"><label>采购成本(含13%):</label><input type="number" v-model.number="foreign.cost" placeholder=""></div>
-            <div class="input-row"><label>销售数量:</label><input type="number" v-model.number="foreign.qty" placeholder=""></div>
-        </div>
-        <div class="card">
-            <h3><i class="fa fa-store"></i> 内销板块 (D公司)</h3>
-            <div class="input-row"><label>售价(含13%):</label><input type="number" v-model.number="domestic.price" placeholder=""></div>
-            <div class="input-row"><label>采购成本(含13%):</label><input type="number" v-model.number="domestic.cost" placeholder=""></div>
-            <div class="input-row"><label>销售数量:</label><input type="number" v-model.number="domestic.qty" placeholder=""></div>
-        </div>
+    <!-- 电商板块 -->
+    <div class="section-title">📱 电商板块 (NA)</div>
+    <div class="card">
+        <div class="input-row"><label>售价(含13%)</label><input type="number" v-model.number="ecom.price" placeholder="例600"></div>
+        <div class="input-row"><label>采购成本(含13%)</label><input type="number" v-model.number="ecom.cost" placeholder="例200"></div>
+        <div class="input-row"><label>销售数量</label><input type="number" v-model.number="ecom.qty" placeholder="例10000"></div>
     </div>
 
-    <!-- 全局参数 -->
-    <div class="param-bar">
-        <div class="param-item"><label>电商费比 (含6%):</label><input type="number" v-model.number="params.ecomFeeRate" step="0.1" placeholder="%"></div>
-        <div class="param-item"><label>授权费率 (含6%):</label><input type="number" v-model.number="params.royaltyRate" step="0.1" placeholder="%"></div>
-        <div class="param-item"><label>加工费 (元/个):</label><input type="number" v-model.number="params.processFee" step="0.5" placeholder=""></div>
-        <div class="param-item"><label>B卖给A单价(含13%):</label><input type="number" v-model.number="params.priceBtoA" step="1" class="wide" placeholder=""></div>
-        <div class="param-item"><label>B卖给D单价(含13%):</label><input type="number" v-model.number="params.priceBtoD" step="1" class="wide" placeholder=""></div>
-        <div class="param-item"><label>组装月费(B):</label><input type="number" v-model.number="params.assemblyMonth" step="1000" placeholder=""></div>
-        <div class="param-item"><label>线下月费(D):</label><input type="number" v-model.number="params.offlineMonth" step="1000" placeholder=""></div>
-        <div class="param-item"><label>退税率:</label><input type="number" v-model.number="params.rebateRate" step="0.1" placeholder="%"></div>
-        <div class="param-item"><label>A占B股权:</label><input type="number" v-model.number="params.ownershipA" step="1" placeholder="%"></div>
-        <div class="param-item"><label>A公司经营费用率:</label><input type="number" v-model.number="params.operateExpenseRate" step="0.1" placeholder="%"></div>
+    <!-- 外贸板块 -->
+    <div class="section-title">🌍 外贸板块 (NA)</div>
+    <div class="card">
+        <div class="input-row"><label>现状售价(含13%)</label><input type="number" v-model.number="foreign.priceCurrent" placeholder="例420"></div>
+        <div class="input-row"><label>避税售价(免税价)</label><input type="number" v-model.number="foreign.pricePlan" placeholder="例420"></div>
+        <div class="input-row"><label>采购成本(含13%)</label><input type="number" v-model.number="foreign.cost" placeholder="例200"></div>
+        <div class="input-row"><label>销售数量</label><input type="number" v-model.number="foreign.qty" placeholder="例5000"></div>
     </div>
 
-    <div style="text-align: right;">
-        <button @click="updateChart"><i class="fa fa-sync-alt"></i> 更新图表与计算</button>
+    <!-- 内销板块 (D公司) -->
+    <div class="section-title">🏬 内销板块 (D公司)</div>
+    <div class="card">
+        <div class="input-row"><label>售价(含13%)</label><input type="number" v-model.number="domestic.price" placeholder="例600"></div>
+        <div class="input-row"><label>采购成本(含13%)</label><input type="number" v-model.number="domestic.cost" placeholder="向B采购价"></div>
+        <div class="input-row"><label>销售数量</label><input type="number" v-model.number="domestic.qty" placeholder="例3000"></div>
     </div>
 
-    <!-- 两方案结果 -->
-    <div class="results-grid">
+    <!-- 全局参数 使用两列网格 -->
+    <div class="section-title">⚙️ 全局参数</div>
+    <div class="param-grid">
+        <div class="param-item"><label>电商费比(含6%)</label><input type="number" v-model.number="params.ecomFeeRate" step="0.1" placeholder="% 例28"></div>
+        <div class="param-item"><label>授权费率(含6%)</label><input type="number" v-model.number="params.royaltyRate" step="0.1" placeholder="% 例23"></div>
+        <div class="param-item"><label>加工费(元/个)</label><input type="number" v-model.number="params.processFee" step="0.5" placeholder="例10"></div>
+        <div class="param-item"><label>B卖给A单价</label><input type="number" v-model.number="params.priceBtoA" step="1" placeholder="例350"></div>
+        <div class="param-item"><label>B卖给D单价</label><input type="number" v-model.number="params.priceBtoD" step="1" placeholder="例350"></div>
+        <div class="param-item"><label>组装月费(B)</label><input type="number" v-model.number="params.assemblyMonth" step="1000" placeholder="例20000"></div>
+        <div class="param-item"><label>线下月费(D)</label><input type="number" v-model.number="params.offlineMonth" step="1000" placeholder="例45000"></div>
+        <div class="param-item"><label>退税率%</label><input type="number" v-model.number="params.rebateRate" step="0.1" placeholder="例10"></div>
+        <div class="param-item"><label>A占B股权%</label><input type="number" v-model.number="params.ownershipA" step="1" placeholder="例80"></div>
+        <div class="param-item"><label>经营费用率%</label><input type="number" v-model.number="params.operateExpenseRate" step="0.1" placeholder="例30"></div>
+    </div>
+
+    <button @click="updateChart">⟳ 更新图表与计算</button>
+
+    <!-- 两方案结果卡片 -->
+    <div class="results-container">
         <!-- 现状 -->
-        <div class="result-box">
-            <h2><i class="fa fa-file-alt"></i> 现状 · A公司 + D公司</h2>
-            <div class="detail-line"><span>A公司电商净利润</span> <span>{{ formatMoney(current.A_ecom_net) }}</span></div>
-            <div class="detail-line" style="margin-left:20px; color:#2c5a82;">
-                增值税: {{ formatMoney(current.A_ecom_vat) }} | 附加: {{ formatMoney(current.A_ecom_surcharge) }} | 
-                所得税: <span :class="{ 'red-text': current.A_ecom_before > 3000000 }">{{ formatMoney(current.A_ecom_tax) }}</span>
-                <i v-if="current.A_ecom_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
-            </div>
-            <div class="detail-line"><span>A公司外贸净利润</span> <span>{{ formatMoney(current.A_foreign_net) }}</span></div>
-            <div class="detail-line" style="margin-left:20px; color:#2c5a82;">
-                增值税: {{ formatMoney(current.A_foreign_vat) }} | 附加: {{ formatMoney(current.A_foreign_surcharge) }} | 
-                所得税: <span :class="{ 'red-text': current.A_foreign_before > 3000000 }">{{ formatMoney(current.A_foreign_tax) }}</span>
-                <i v-if="current.A_foreign_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
-            </div>
-            <div class="detail-line"><span>A公司经营费用 ({{ formatPercent(params.operateExpenseRate) }} 收入)</span> <span>{{ formatMoney(current.A_operate_expense) }}</span></div>
-            <div class="detail-line"><span>A公司合计利润(税前)</span> <span>{{ formatMoney(current.A_total_before_tax) }}</span></div>
-            <div class="detail-line">
-                <span>A公司所得税(汇总)</span> 
-                <span :class="{ 'red-text': current.A_total_before_tax > 3000000 }">{{ formatMoney(current.A_total_tax) }}</span>
-                <i v-if="current.A_total_before_tax > 3000000" class="fa fa-exclamation-triangle warning-icon" title="汇总利润超300万，税率25%"></i>
-            </div>
-            <div class="detail-line total"><span>A公司净利润</span> <span>{{ formatMoney(current.A_net) }}</span></div>
-            <div class="detail-line"><span>D公司净利润</span> <span>{{ formatMoney(current.D_net) }}</span></div>
-            <div class="detail-line" style="margin-left:20px;">
-                增值税: {{ formatMoney(current.D_vat) }} | 附加: {{ formatMoney(current.D_surcharge) }} | 
-                所得税: <span :class="{ 'red-text': current.D_before > 3000000 }">{{ formatMoney(current.D_tax) }}</span>
-                <i v-if="current.D_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
-            </div>
-            <div class="detail-line total" style="font-size:1.8rem;"><span>🏁 归属A总额</span> <span>{{ formatMoney(current.total_to_A) }}</span></div>
+        <div class="result-card">
+            <h2><span>📋 现状 · A+D</span></h2>
+            <div class="detail-line"><span>A电商净利润</span> <span>{{ formatMoney(current.A_ecom_net) }}</span></div>
+            <div class="detail-line sub"><span>增值税 {{ formatMoney(current.A_ecom_vat) }} | 附加 {{ formatMoney(current.A_ecom_surcharge) }} | 所得税 <span :class="{ 'red-text': current.A_ecom_before > 3000000 }">{{ formatMoney(current.A_ecom_tax) }}</span><i v-if="current.A_ecom_before > 3000000" class="warning-icon">🔥</i></span></div>
+            <div class="detail-line"><span>A外贸净利润</span> <span>{{ formatMoney(current.A_foreign_net) }}</span></div>
+            <div class="detail-line sub"><span>增值税 {{ formatMoney(current.A_foreign_vat) }} | 附加 {{ formatMoney(current.A_foreign_surcharge) }} | 所得税 <span :class="{ 'red-text': current.A_foreign_before > 3000000 }">{{ formatMoney(current.A_foreign_tax) }}</span><i v-if="current.A_foreign_before > 3000000" class="warning-icon">🔥</i></span></div>
+            <div class="detail-line"><span>经营费用 ({{params.operateExpenseRate||0}}%)</span> <span>{{ formatMoney(current.A_operate_expense) }}</span></div>
+            <div class="detail-line"><span>A税前合计</span> <span>{{ formatMoney(current.A_total_before_tax) }}</span></div>
+            <div class="detail-line"><span>A所得税(汇总)</span> <span :class="{ 'red-text': current.A_total_before_tax > 3000000 }">{{ formatMoney(current.A_total_tax) }}</span><i v-if="current.A_total_before_tax > 3000000" class="warning-icon">🔥</i></div>
+            <div class="detail-line total"><span>A净利润</span> <span>{{ formatMoney(current.A_net) }}</span></div>
+            <div class="detail-line"><span>D净利润</span> <span>{{ formatMoney(current.D_net) }}</span></div>
+            <div class="detail-line sub"><span>增值税 {{ formatMoney(current.D_vat) }} | 附加 {{ formatMoney(current.D_surcharge) }} | 所得税 <span :class="{ 'red-text': current.D_before > 3000000 }">{{ formatMoney(current.D_tax) }}</span><i v-if="current.D_before > 3000000" class="warning-icon">🔥</i></span></div>
+            <div class="detail-line total" style="font-size:1.3rem;"><span>🏁 归属A总额</span> <span>{{ formatMoney(current.total_to_A) }}</span></div>
         </div>
+
         <!-- 避税方案 -->
-        <div class="result-box">
-            <h2><i class="fa fa-chart-line"></i> 避税方案 · A({{ formatPercent(params.ownershipA) }} B) + C + D</h2>
-            <div class="detail-line"><span>A公司电商净利润</span> <span>{{ formatMoney(plan.A_ecom_net) }}</span></div>
-            <div class="detail-line" style="margin-left:20px;">
-                增值税: {{ formatMoney(plan.A_ecom_vat) }} | 附加: {{ formatMoney(plan.A_ecom_surcharge) }} | 
-                所得税: <span :class="{ 'red-text': plan.A_ecom_before > 3000000 }">{{ formatMoney(plan.A_ecom_tax) }}</span>
-                <i v-if="plan.A_ecom_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
-            </div>
-            <div class="detail-line"><span>A品牌授权费净收入</span> <span>{{ formatMoney(plan.A_royalty_net) }}</span></div>
-            <div class="detail-line" style="margin-left:20px;">
-                销项: {{ formatMoney(plan.royalty_output) }} | 附加: {{ formatMoney(plan.royalty_surcharge) }} | 
-                所得税: <span :class="{ 'red-text': plan.royalty_before > 3000000 }">{{ formatMoney(plan.royalty_tax) }}</span>
-                <i v-if="plan.royalty_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
-            </div>
-            <div class="detail-line"><span>A公司经营费用 ({{ formatPercent(params.operateExpenseRate) }} 收入)</span> <span>{{ formatMoney(plan.A_operate_expense) }}</span></div>
-            <div class="detail-line"><span>A公司自身净利润合计</span> <span>{{ formatMoney(plan.A_self_net) }}</span></div>
+        <div class="result-card">
+            <h2><span>🧩 避税 · A({{params.ownershipA||0}}% B)+C+D</span></h2>
+            <div class="detail-line"><span>A电商净利润</span> <span>{{ formatMoney(plan.A_ecom_net) }}</span></div>
+            <div class="detail-line sub"><span>增值税 {{ formatMoney(plan.A_ecom_vat) }} | 附加 {{ formatMoney(plan.A_ecom_surcharge) }} | 所得税 <span :class="{ 'red-text': plan.A_ecom_before > 3000000 }">{{ formatMoney(plan.A_ecom_tax) }}</span><i v-if="plan.A_ecom_before > 3000000" class="warning-icon">🔥</i></span></div>
+            <div class="detail-line"><span>授权费净收入</span> <span>{{ formatMoney(plan.A_royalty_net) }}</span></div>
+            <div class="detail-line sub"><span>销项 {{ formatMoney(plan.royalty_output) }} | 附加 {{ formatMoney(plan.royalty_surcharge) }} | 所得税 <span :class="{ 'red-text': plan.royalty_before > 3000000 }">{{ formatMoney(plan.royalty_tax) }}</span><i v-if="plan.royalty_before > 3000000" class="warning-icon">🔥</i></span></div>
+            <div class="detail-line"><span>经营费用 ({{params.operateExpenseRate||0}}%)</span> <span>{{ formatMoney(plan.A_operate_expense) }}</span></div>
+            <div class="detail-line"><span>A自身净利润</span> <span>{{ formatMoney(plan.A_self_net) }}</span></div>
             <div class="detail-line"><span>B公司(含C)净利润</span> <span>{{ formatMoney(plan.B_withC_net) }}</span></div>
-            <div class="detail-line" style="margin-left:20px;">
-                B增值税: {{ formatMoney(plan.B_vat) }} | 附加: {{ formatMoney(plan.B_surcharge) }} | 
-                B所得税: <span :class="{ 'red-text': plan.B_before > 3000000 }">{{ formatMoney(plan.B_tax) }}</span>
-                <i v-if="plan.B_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i> | 
-                C税后: {{ formatMoney(plan.C_net) }}
-            </div>
-            <div class="detail-line"><span>其中{{ formatPercent(params.ownershipA) }}归属A</span> <span>{{ formatMoney(plan.fromB_to_A) }}</span></div>
-            <div class="detail-line"><span>D公司净利润</span> <span>{{ formatMoney(plan.D_net) }}</span></div>
-            <div class="detail-line" style="margin-left:20px;">
-                D增值税: {{ formatMoney(plan.D_vat) }} | 附加: {{ formatMoney(plan.D_surcharge) }} | 
-                所得税: <span :class="{ 'red-text': plan.D_before > 3000000 }">{{ formatMoney(plan.D_tax) }}</span>
-                <i v-if="plan.D_before > 3000000" class="fa fa-exclamation-triangle warning-icon" title="利润超300万，税率25%"></i>
-            </div>
-            <div class="detail-line total" style="font-size:1.8rem;"><span>🏁 归属A总额</span> <span>{{ formatMoney(plan.total_to_A) }}</span></div>
-            <div class="detail-line" style="margin-top:12px; background:#ebf3fa; padding:12px; border-radius:20px;">构成: A自身 {{ formatMoney(plan.A_self_net) }} + B分得 {{ formatMoney(plan.fromB_to_A) }} + D {{ formatMoney(plan.D_net) }}</div>
+            <div class="detail-line sub"><span>B增值税 {{ formatMoney(plan.B_vat) }} | 附加 {{ formatMoney(plan.B_surcharge) }} | B所得税 <span :class="{ 'red-text': plan.B_before > 3000000 }">{{ formatMoney(plan.B_tax) }}</span><i v-if="plan.B_before > 3000000" class="warning-icon">🔥</i> | C税后 {{ formatMoney(plan.C_net) }}</span></div>
+            <div class="detail-line"><span>{{params.ownershipA||0}}%归属A</span> <span>{{ formatMoney(plan.fromB_to_A) }}</span></div>
+            <div class="detail-line"><span>D净利润</span> <span>{{ formatMoney(plan.D_net) }}</span></div>
+            <div class="detail-line sub"><span>增值税 {{ formatMoney(plan.D_vat) }} | 附加 {{ formatMoney(plan.D_surcharge) }} | 所得税 <span :class="{ 'red-text': plan.D_before > 3000000 }">{{ formatMoney(plan.D_tax) }}</span><i v-if="plan.D_before > 3000000" class="warning-icon">🔥</i></span></div>
+            <div class="detail-line total" style="font-size:1.3rem;"><span>🏁 归属A总额</span> <span>{{ formatMoney(plan.total_to_A) }}</span></div>
+            <div class="detail-line" style="margin-top:8px; background:#e6f0fa; padding:8px; border-radius:16px;">构成: A自身 {{ formatMoney(plan.A_self_net) }} + B分得 {{ formatMoney(plan.fromB_to_A) }} + D {{ formatMoney(plan.D_net) }}</div>
         </div>
     </div>
 
-    <!-- 图表区 -->
+    <!-- 图表 -->
     <div class="chart-box">
         <canvas id="profitChart"></canvas>
     </div>
 
-    <!-- 临界点洞察 -->
-    <div class="insight" id="insightText">
-        <h3><i class="fa fa-lightbulb"></i> 关键体量节点 & 分拆建议</h3>
-        <p>🔹 当前设定下，<strong>电商销量约 <span id="criticalPoint">-</span> 个</strong> 时，现状利润总额达300万元（所得税跳涨至25%），避税方案开始反超。（需填写电商数量）</p>
-        <p>🔹 当电商销量超过 <span id="thresholdA">-</span> 个，避税方案中A公司自身利润逼近300万，建议<strong>增设B1公司承接部分品牌授权收入</strong>，或<strong>B2公司独立承接外贸业务</strong>，将利润分流以继续享受小微优惠。</p>
-        <p>🔹 鼠标悬停在图表曲线上，会显示该销量下两个方案的净利润及针对性建议（图表以电商销量为自变量，请确保电商数量已填写）。</p>
+    <!-- 临界点提示 -->
+    <div class="insight">
+        <h3>📌 关键节点</h3>
+        <p>🔹 现状利润达300万销量约 <strong><span id="criticalPoint">—</span></strong> 个</p>
+        <p>🔹 A自身利润近300万销量约 <strong><span id="thresholdA">—</span></strong> 个</p>
+        <p>🔹 鼠标悬停图表看详细建议</p>
     </div>
-    <div class="footnote">* 所得税按小微企业5%（利润≤300万）或25%自动判断。红色数字表示该主体利润超300万，适用25%税率。所有输入框为空时按0处理。C个体户利润已完全并入B公司。修正：内销产品配件成本现使用电商采购成本。</div>
+
+    <div class="footnote">
+        * 所得税: ≤300万按5%，＞300万按25% · 红色数字+🔥表示税率25% · 未填按0处理
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
@@ -177,13 +358,9 @@
     new Vue({
         el: '#app',
         data: {
-            // 电商板块
             ecom: { price: '', cost: '', qty: '' },
-            // 外贸板块
             foreign: { priceCurrent: '', pricePlan: '', cost: '', qty: '' },
-            // 内销板块
             domestic: { price: '', cost: '', qty: '' },
-            // 全局参数
             params: {
                 ecomFeeRate: '',
                 royaltyRate: '',
@@ -229,30 +406,14 @@
                 if (isNaN(val) || val === 0) return '¥0.00万';
                 return '¥' + (val / 10000).toFixed(2) + '万';
             },
-            formatPercent(val) {
-                const num = this.toNumber(val);
-                return num ? num + '%' : '0%';
-            },
             taxCalc(profit) {
                 return profit > 3000000 ? profit * 0.25 : profit * 0.05;
             },
             // 现状计算
             calcCurrent() {
-                const e = {
-                    price: this.toNumber(this.ecom.price),
-                    cost: this.toNumber(this.ecom.cost),
-                    qty: this.toNumber(this.ecom.qty)
-                };
-                const f = {
-                    priceCurrent: this.toNumber(this.foreign.priceCurrent),
-                    cost: this.toNumber(this.foreign.cost),
-                    qty: this.toNumber(this.foreign.qty)
-                };
-                const d = {
-                    price: this.toNumber(this.domestic.price),
-                    cost: this.toNumber(this.domestic.cost),
-                    qty: this.toNumber(this.domestic.qty)
-                };
+                const e = { price: this.toNumber(this.ecom.price), cost: this.toNumber(this.ecom.cost), qty: this.toNumber(this.ecom.qty) };
+                const f = { priceCurrent: this.toNumber(this.foreign.priceCurrent), cost: this.toNumber(this.foreign.cost), qty: this.toNumber(this.foreign.qty) };
+                const d = { price: this.toNumber(this.domestic.price), cost: this.toNumber(this.domestic.cost), qty: this.toNumber(this.domestic.qty) };
                 const p = {
                     ecomFeeRate: this.toNumber(this.params.ecomFeeRate),
                     royaltyRate: this.toNumber(this.params.royaltyRate),
@@ -270,13 +431,14 @@
                 const ecomRevInc = e.price * e.qty;
                 const ecomCostInc = e.cost * e.qty;
                 const ecomFeeInc = ecomRevInc * p.ecomFeeRate / 100;
-
                 const ecomRev = ecomRevInc / 1.13;
                 const ecomCost = ecomCostInc / 1.13;
                 const ecomFee = ecomFeeInc / 1.06;
                 const ecomVAT = ecomRev*0.13 - ecomCost*0.13 - ecomFee*0.06;
                 const ecomSurcharge = ecomVAT * 0.12;
                 const ecomProfitBefore = ecomRev - ecomCost - ecomFee - ecomSurcharge;
+                const ecomTax = this.taxCalc(ecomProfitBefore);
+                const ecomNet = ecomProfitBefore - ecomTax;
 
                 // 外贸
                 const foreignRevInc = f.priceCurrent * f.qty;
@@ -286,11 +448,12 @@
                 const foreignVAT = foreignRev*0.13 - foreignCost*0.13;
                 const foreignSurcharge = foreignVAT * 0.12;
                 const foreignProfitBefore = foreignRev - foreignCost - foreignSurcharge;
+                const foreignTax = this.taxCalc(foreignProfitBefore);
+                const foreignNet = foreignProfitBefore - foreignTax;
 
-                // A公司总收入不含税
+                // A经营费用
                 const A_total_revenue = ecomRev + foreignRev;
                 const operateExpense = A_total_revenue * p.operateExpenseRate / 100;
-
                 const A_total_before = ecomProfitBefore + foreignProfitBefore - operateExpense;
                 const A_total_tax = this.taxCalc(A_total_before);
                 const A_net = A_total_before - A_total_tax;
@@ -307,15 +470,15 @@
                 const D_net = D_profitBefore - D_tax;
 
                 this.current = {
-                    A_ecom_net: ecomProfitBefore - this.taxCalc(ecomProfitBefore),
+                    A_ecom_net: ecomNet,
                     A_ecom_vat: ecomVAT,
                     A_ecom_surcharge: ecomSurcharge,
-                    A_ecom_tax: this.taxCalc(ecomProfitBefore),
+                    A_ecom_tax: ecomTax,
                     A_ecom_before: ecomProfitBefore,
-                    A_foreign_net: foreignProfitBefore - this.taxCalc(foreignProfitBefore),
+                    A_foreign_net: foreignNet,
                     A_foreign_vat: foreignVAT,
                     A_foreign_surcharge: foreignSurcharge,
-                    A_foreign_tax: this.taxCalc(foreignProfitBefore),
+                    A_foreign_tax: foreignTax,
                     A_foreign_before: foreignProfitBefore,
                     A_operate_expense: operateExpense,
                     A_total_before_tax: A_total_before,
@@ -329,22 +492,11 @@
                     total_to_A: A_net + D_net
                 };
             },
-            // 避税方案计算（修正内销配件成本）
+            // 避税方案计算 (修正内销配件成本)
             calcPlan() {
-                const e = {
-                    price: this.toNumber(this.ecom.price),
-                    cost: this.toNumber(this.ecom.cost),
-                    qty: this.toNumber(this.ecom.qty)
-                };
-                const f = {
-                    pricePlan: this.toNumber(this.foreign.pricePlan),
-                    cost: this.toNumber(this.foreign.cost),
-                    qty: this.toNumber(this.foreign.qty)
-                };
-                const d = {
-                    price: this.toNumber(this.domestic.price),
-                    qty: this.toNumber(this.domestic.qty)
-                };
+                const e = { price: this.toNumber(this.ecom.price), cost: this.toNumber(this.ecom.cost), qty: this.toNumber(this.ecom.qty) };
+                const f = { pricePlan: this.toNumber(this.foreign.pricePlan), cost: this.toNumber(this.foreign.cost), qty: this.toNumber(this.foreign.qty) };
+                const d = { price: this.toNumber(this.domestic.price), qty: this.toNumber(this.domestic.qty) };
                 const p = {
                     ecomFeeRate: this.toNumber(this.params.ecomFeeRate),
                     royaltyRate: this.toNumber(this.params.royaltyRate),
@@ -384,20 +536,16 @@
                 const B_toD_rev = B_toD_revInc / 1.13;
                 const B_toD_output = B_toD_rev * 0.13;
 
-                // 修正：内销产品的配件成本使用电商成本 e.cost
+                // 内销配件成本使用电商成本 e.cost
                 const B_partsInc = (e.qty * e.cost) + (f.qty * f.cost) + (d.qty * e.cost);
                 const B_partsNet = B_partsInc / 1.13;
                 const B_partsInput = B_partsNet * 0.13;
-
                 const B_input_C = C_vat;
-
                 const B_output = B_toA_output + B_toD_output;
                 const B_vat = Math.max(0, B_output - B_partsInput - B_input_C);
                 const B_surcharge = B_vat * 0.12;
-
                 const B_revenue = B_toA_rev + B_foreign_rev + B_toD_rev;
 
-                // 修正内销配件成本
                 const B_partsNet_normal = (e.qty * e.cost / 1.13) + (d.qty * e.cost / 1.13);
                 const B_foreign_adj = B_foreign_costNet - B_foreign_rebate;
                 const B_totalPartsNet = B_partsNet_normal + B_foreign_adj;
@@ -434,10 +582,9 @@
                 const royaltyTax = this.taxCalc(royaltyProfitBefore);
                 const royaltyNetProfit = royaltyProfitBefore - royaltyTax;
 
-                // A公司总收入不含税
+                // A经营费用
                 const A_total_revenue = A_ecomRev + royaltyNet;
                 const operateExpense = A_total_revenue * p.operateExpenseRate / 100;
-
                 const A_self_before = A_ecomProfitBefore + royaltyProfitBefore - operateExpense;
                 const A_self_tax = this.taxCalc(A_self_before);
                 const A_self_net = A_self_before - A_self_tax;
@@ -494,26 +641,19 @@
                     type: 'line',
                     data: { labels: [], datasets: [] },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
+                        responsive: true,
+                        maintainAspectRatio: true,
                         plugins: {
                             tooltip: {
                                 callbacks: {
-                                    label: (ctx) => `${ctx.dataset.label}: ¥${(ctx.raw/10000).toFixed(2)}万`,
-                                    afterBody: (context) => {
-                                        if (!context.length) return [];
-                                        let idx = context[0].dataIndex;
-                                        let q = 5000 + idx * 1000;
-                                        let lines = [];
-                                        if (q >= 16000 && q < 18000) lines.push('🔸 现状利润超300万，税负跳涨，避税优势显现');
-                                        if (q >= 20000) lines.push('🔹 A自身利润近300万，可考虑设B1/B2分流');
-                                        return lines;
-                                    }
+                                    label: (ctx) => `${ctx.dataset.label}: ¥${(ctx.raw/10000).toFixed(2)}万`
                                 }
                             },
-                            legend: { position: 'top' }
+                            legend: { position: 'top', labels: { boxWidth: 12 } }
                         },
-                        scales: { y: { ticks: { callback: (v) => '¥' + (v/10000).toFixed(1) + '万' } } }
+                        scales: {
+                            y: { ticks: { callback: (v) => '¥' + (v/10000).toFixed(1) + '万' } }
+                        }
                     }
                 });
                 this.updateChart();
@@ -521,9 +661,7 @@
             updateChart() {
                 this.recalcAll();
                 const originalQty = this.toNumber(this.ecom.qty);
-                const labels = [];
-                const currentData = [];
-                const planData = [];
+                const labels = [], currentData = [], planData = [];
                 for (let q = 5000; q <= 40000; q += 1000) {
                     this.ecom.qty = q;
                     this.calcCurrent();
@@ -538,32 +676,27 @@
                 if (this.chart) {
                     this.chart.data.labels = labels;
                     this.chart.data.datasets = [
-                        { label: '现状归属A净利润', data: currentData, borderColor: '#1f6194', backgroundColor: 'transparent', tension: 0.2, pointRadius: 3 },
-                        { label: '避税方案归属A净利润', data: planData, borderColor: '#b13e3e', backgroundColor: 'transparent', tension: 0.2, pointRadius: 3 }
+                        { label: '现状净利润', data: currentData, borderColor: '#1f6194', backgroundColor: 'transparent', tension: 0.2, pointRadius: 2 },
+                        { label: '避税净利润', data: planData, borderColor: '#b13e3e', backgroundColor: 'transparent', tension: 0.2, pointRadius: 2 }
                     ];
                     this.chart.update();
                 }
 
-                let criticalQ = 0;
+                // 临界点
+                let criticalQ = 0, thresholdQ = 0;
                 for (let q = 5000; q <= 40000; q+=500) {
-                    this.ecom.qty = q;
-                    this.calcCurrent();
+                    this.ecom.qty = q; this.calcCurrent();
                     if (this.current.A_total_before_tax >= 3000000) { criticalQ = q; break; }
                 }
-                document.getElementById('criticalPoint').innerText = criticalQ ? criticalQ.toLocaleString() : '—';
-                let thresholdQ = 0;
                 for (let q = 5000; q <= 50000; q+=1000) {
-                    this.ecom.qty = q;
-                    this.calcPlan();
+                    this.ecom.qty = q; this.calcPlan();
                     if (this.plan.A_self_net + this.plan.fromB_to_A > 3000000) { thresholdQ = q; break; }
                 }
+                document.getElementById('criticalPoint').innerText = criticalQ ? criticalQ.toLocaleString() : '—';
                 document.getElementById('thresholdA').innerText = thresholdQ ? thresholdQ.toLocaleString() : '—';
                 this.ecom.qty = originalQty;
                 this.recalcAll();
             }
-        },
-        watch: {
-            // 手动点击更新，不自动
         }
     });
 </script>
